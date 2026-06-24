@@ -514,11 +514,12 @@
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">Certifications</span><h2>Credentials &amp; competencies</h2><p>A selection of my strongest certificates — click any to preview it in full.</p></div>
     <div class="vgrid" id="certGrid"></div>
+    <div class="vgrid" id="moreGrid" style="margin-top:20px;display:none"></div>
     <div class="reveal" style="margin-top:32px;text-align:center">
-      <a class="btn btn-ghost magnetic" href="https://drive.google.com/drive/folders/1eNguJSvwZWJ9tu4WFp-DnR1WEtZWdJNK" target="_blank" rel="noopener" style="display:inline-flex">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        <span>View all certificates on Drive</span>
-      </a>
+      <button class="btn btn-ghost magnetic" id="viewAllBtn" style="display:inline-flex" aria-expanded="false">
+        <svg id="viewAllIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        <span id="viewAllLabel">View all certificates</span>
+      </button>
     </div>
   </div>
 </section>
@@ -607,7 +608,7 @@
       <div class="vbody">
         <span class="vissuer">${c.issuer}</span>
         <span class="vtitle">${c.title}</span>
-        <span class="vdate">${c.date}</span>
+        ${c.date?`<span class="vdate">${c.date}</span>`:''}
       </div>`;
     if(clickable) el.addEventListener('click', ()=>openModal(c));
     return el;
@@ -617,6 +618,94 @@
   AWARDS.forEach(a=>ag.appendChild(makeCard(a, true)));
   const cg = document.getElementById('certGrid');
   CERTS.forEach(c=>cg.appendChild(makeCard(c, false)));
+
+  /* ---------- MORE certificates (revealed in-page via "View all") ---------- */
+  const MORE = [
+    {id:"1xind1T0cc-QLQwEX92ktjyrqIleAVboa", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1eMhN6OxTsN7G5wHK2nFSrWG8fQ-HkUYD", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1ZYT9o-TD2z2g35ioayaBhtGixn_vkOqA", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1zeAfsc7jyhz1Vm6P9SD35zPXF2GlEI9I", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1MsMCir9iGQmn8Dpd9t_RBtKNdULwncTN", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"19Cv1hIJp6d4llOEup-PxDayr_9H4M1T9", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1LywCBL8ZLsWbmdJEDT8RPcdAOxbJBGOR", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1nFAsZ0zvkK-DBk71MvM9a-ZA2rF1LgyG", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1ommNa0L5Gr-e0laI4qoeKvRRjTYsqHqw", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"11LYLv7creD_BxJ2mcqRj5hCtRKNNSk3P", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1v7k0tZTED3PqN9UqoipymhpfNhCTOCG5", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1sXhXbauRilXm2zmwI13D0Nr-UkDiLLuU", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"12PIzVH0M6PzYRy2DVXxbfWTMlyxR4EYh", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1LWJY3BmaMiWlK96zA0KVrOeykHi1wIZE", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1hQCfCVYR9F7WEDqCSFd1yjZM1J7f81P2", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1Dh26GUuIVh7s4ZPTlYRWVmL0O5FtfMfq", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"12rND20tP_54B-ZOYmwh24JVUIpdiNE4E", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"16PHkLscfmRThgleQy_Q3mZsIJSQBrrA2", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"18ZD7z2htc60bEFWEH3pB_WjmNcv1Ona5", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1p2KRZoILVi3kCQIViuHYEDEiSOEZPVzj", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1vIjNiPHa9E8dU7-dgMafOJXtqCHkCpAa", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1P-JH6SOX4QvAEku00nySsvkoijv9IKNN", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1l1m7Pjmhpbxwb-eOdOoMNaUsupcvh1H5", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1HCTK9OZCmlaSWZqy5KDT4Tx8K_P4_0Vo", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1CG1Pwatj9fiLSECjmygfDeiZhbMbwb40", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"12glIExXpM4t6Srqua5RffOLdARIEwcdU", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1co3UCFc87bS4TgoVpMJYzKveqQo-AR50", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1h8z6OHLxAzytA59ll3HJsOWaSOAnYAxd", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1dhKxSScEMbSfVL7mA7TLYk697T_6oMPc", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1T_7fb47HrUSx9k8KF263c6IoOnb1HWkg", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"1SZROuGIsDnZRASITQcvcAAluyWKBKNQ6", issuer:"Coursera", title:"Coursera Course Certificate"},
+    {id:"19_vNFcmJ2KpyIHs2tTfCo8cjcrxEd2cT", issuer:"Dicoding", title:"Dicoding Course Certificate"},
+    {id:"1CRUO8LkAQIEEd_XLX3O8Pc6MIwNACxc5", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1CIteXMNJcd7tOCnP703N5N9udVhJTVET", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1h9QX77TId7WBCG9ttjetpieXbzNuBde0", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1xHP7D1IYEsIKvP-OzoVWu3bKOdA9ko5T", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1JjYN5_fHtIYvqcHKXWxm1wBwl7msSQTr", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1KKydv11AHs-Vq48aN-DFztPev5NB_0AL", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1XVNmhsyDabCUnvi_B8v88WznESUdmQnW", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1iB3278t0JtrGVFrziaukWnf9ptYPrGsU", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1En918zGEHrFS7va-x1PiEwkYuSUBTjE5", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1E2Vrj9RIQh1UHmVc08XEn0Ds85H64XJp", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1xbP9Ko1kg0D_9thTg6MyRAmnWuo2ehsl", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1TwLmxjxnxRAcymd49gIeLTO1TEDqPxYI", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1BkOLTn3JiNMWFQ-L0sH2TRG6Zmg_3Ksl", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1IhY0pU3V6NEDeLoaimc4I1Lob1bnK0b3", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1Cx7Pf_ChacVL03prAFkBJ8FAiO-5b6ls", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1By2kYBLMRwzyZGxqmApTteYtSX-nA736", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1CXxEXt95DeQKcwPLbNPX4BkG6vYn22-m", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"116soarLepu9kEAdjW3oj1tG6llNWM9_S", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1zVR1_XIDz1Z9-4xwSML68auMNbPNIt3Z", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1MaLFJpemWJBQRiqWGhBe46Nw0Qeq6zxA", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1d4nNb1ElnLO7pXZil3MXj-oakdiaOeHF", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1adXT2ts9DCDbdpwYlbExjl3NOkAT6J7v", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1g9T3xAqi81TM4swmr1zjqV21ohFHlcT2", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1yCJasVQSwjOt7IyF2ggVoDFhPKOt5qst", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1N1D7rQTLebTYL5Lu11s6bV9zFV8LPJit", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"16-DjHtPPAB1mH7V_Q5OUch3NFvWW85LC", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1f8FXQ89YbbeYMe8H6FgdyuWWJeEtmJTv", issuer:"Certificate", title:"Certificate of Participation"},
+    {id:"1UUTXs9fxBH5i-6MS8EbXV51WJlijy9UK", issuer:"Certificate", title:"E-Certificate"},
+    {id:"1ydBKeUQDS5P2gQalg1g10hCllc45wAU3", issuer:"Financial Camp", title:"Financial Camp Participant"},
+    {id:"1WyglbaRXvIr3q0QA8RM8kxCXGCCA_QOI", issuer:"Financial Light", title:"Financial Light 2022"},
+    {id:"1BZFfFAzydN1NvlFnGV0w9APtDqB29Ztf", issuer:"Financial Light", title:"Financial Light 2022"},
+    {id:"1xkgm-v_HYgXyggSC1TZbISzwJ0QodUdj", issuer:"Financial Light", title:"Financial Light 2022"},
+    {id:"1-vHFoBFtQldG2_3Azu1mNY9N2EZruG_P", issuer:"Financial Light", title:"Financial Light 2022"},
+    {id:"1jH9RO4yJml91XDrr8M2V1hRmg8UfRsaZ", issuer:"Organization", title:"OSIS Certificate"},
+    {id:"1Z1SVGAiycmbUHKSdzyaY6X4QyYHKJFJ8", issuer:"Olimpiade", title:"Olimpiade Komputer Certificate"},
+    {id:"1a4S9Yg9SAtbatTgJXgV5ynKH7YOyNAZ4", issuer:"Kemendikbudristek · PIMNAS 37", title:"PKM-Riset Eksakta — Participant"}
+  ];
+  const moreGrid=document.getElementById('moreGrid');
+  const viewAllBtn=document.getElementById('viewAllBtn');
+  const viewAllLabel=document.getElementById('viewAllLabel');
+  const viewAllIcon=document.getElementById('viewAllIcon');
+  const totalCerts=CERTS.length+MORE.length;
+  viewAllLabel.textContent='View all '+totalCerts+' certificates';
+  let moreRendered=false, moreOpen=false;
+  viewAllBtn.addEventListener('click',()=>{
+    if(!moreRendered){ MORE.forEach(c=>moreGrid.appendChild(makeCard(c,false))); moreRendered=true; }
+    moreOpen=!moreOpen;
+    moreGrid.style.display=moreOpen?'grid':'none';
+    viewAllLabel.textContent=moreOpen?'Show fewer':('View all '+totalCerts+' certificates');
+    viewAllIcon.style.transform=moreOpen?'rotate(180deg)':'';
+    viewAllBtn.setAttribute('aria-expanded',moreOpen);
+    if(!moreOpen) document.getElementById('certifications').scrollIntoView({behavior:'smooth',block:'start'});
+  });
 
   /* ---------- modal ---------- */
   const modal=document.getElementById('modal'),frame=document.getElementById('modalFrame'),
