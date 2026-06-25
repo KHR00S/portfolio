@@ -154,7 +154,8 @@ function VCard({ item, isAward, onOpen, index = 0 }) {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: '0px 0px -6% 0px' }}
       transition={{ type: 'spring', stiffness: 130, damping: 18, delay: (index % 4) * 0.07 }}
-      whileHover={clickable ? { y: -8, scale: 1.02 } : { y: -4 }}>
+      whileHover={clickable ? { y: -8, scale: 1.02 } : { y: -4 }}
+      whileTap={clickable ? { scale: 0.98 } : undefined}>
       <div className="vthumb">
         {isAward && item.rank && (<span className="ribbon"><Ic k="trophy" />{item.rank}</span>)}
         {clickable && !failed ? (
@@ -185,12 +186,15 @@ export default function App() {
   const [active, setActive] = useState('')
   const [showAll, setShowAll] = useState(false)
   const reduce = useReducedMotion()
+  const [isDesktop, setIsDesktop] = useState(false)
 
-  /* hero parallax */
+  /* hero parallax — desktop only, so the mobile description never fades while scrolling */
   const { scrollY } = useScroll()
-  const heroY = useTransform(scrollY, [0, 600], [0, 130])
-  const heroFade = useTransform(scrollY, [0, 520], [1, 0])
-  const portraitY = useTransform(scrollY, [0, 600], [0, -60])
+  const heroY = useTransform(scrollY, [0, 600], [0, 120])
+  const heroFade = useTransform(scrollY, [0, 560], [1, 0.3])
+  const portraitY = useTransform(scrollY, [0, 600], [0, -56])
+  const tiltX = useSpring(0, { stiffness: 150, damping: 15 })
+  const tiltY = useSpring(0, { stiffness: 150, damping: 15 })
 
   useEffect(() => {
     let saved = null
@@ -219,6 +223,13 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [modal])
 
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 900px) and (pointer: fine)')
+    const upd = () => setIsDesktop(mq.matches)
+    upd(); mq.addEventListener('change', upd)
+    return () => mq.removeEventListener('change', upd)
+  }, [])
+
   const totalCerts = CERTS.length + MORE.length
   const float = reduce ? {} : { y: [0, -14, 0] }
 
@@ -233,8 +244,10 @@ export default function App() {
         <div className={'nav-inner' + (scrolled ? ' scrolled' : '')}>
           <a href="#home" className="brand"><span className="dot" />Fakhrus&nbsp;Syakir</a>
           <nav className="nav-links">
-            {NAV.map(([label, href]) => (
-              <a key={href} href={href} className={active === href.slice(1) ? 'active' : ''}>{label}</a>
+            {NAV.map(([label, href], i) => (
+              <motion.a key={href} href={href} className={active === href.slice(1) ? 'active' : ''}
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4 }}
+                whileHover={{ y: -2 }}>{label}</motion.a>
             ))}
           </nav>
           <motion.button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -249,7 +262,7 @@ export default function App() {
         <section className="hero">
           <div className="grid-bg" />
           <div className="wrap hero-inner">
-            <motion.div className="hero-text" style={{ y: heroY, opacity: heroFade }}>
+            <motion.div className="hero-text" style={isDesktop ? { y: heroY, opacity: heroFade } : undefined}>
               <Reveal as="span" className="badge glass gloss"><span className="pulse" />Currently @ PT Mastersystem Infotama · Junior Network Engineer</Reveal>
               <Reveal as="span" className="eyebrow" delay={0.05}>Network Engineer · ML Researcher</Reveal>
               <Reveal as="h1" delay={0.1}>Fakhrus Syakir<br /><span className="grad">Networks, power &amp; intelligence</span></Reveal>
@@ -266,14 +279,22 @@ export default function App() {
                 ))}
               </Reveal>
             </motion.div>
-            <Reveal className="portrait-wrap" delay={0.15}>
-              <motion.div style={{ y: portraitY }}>
-                <motion.div animate={float} transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }} style={{ position: 'relative' }}>
-                  <div className="portrait-glow" />
-                  <div className="portrait-frame gloss">
-                    <img className="portrait" src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir in a suit, outdoors"
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
-                  </div>
+            <Reveal className="portrait-wrap" delay={0.15}
+              onMouseMove={isDesktop ? (e) => {
+                const r = e.currentTarget.querySelector('.portrait-frame').getBoundingClientRect()
+                tiltY.set(((e.clientX - r.left) / r.width - 0.5) * 16)
+                tiltX.set(-((e.clientY - r.top) / r.height - 0.5) * 16)
+              } : undefined}
+              onMouseLeave={() => { tiltX.set(0); tiltY.set(0) }}>
+              <motion.div style={isDesktop ? { y: portraitY } : undefined}>
+                <motion.div animate={float} transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }} style={{ position: 'relative', perspective: 1000 }}>
+                  <motion.div style={{ rotateX: tiltX, rotateY: tiltY, transformStyle: 'preserve-3d' }}>
+                    <div className="portrait-glow" />
+                    <div className="portrait-frame gloss">
+                      <img className="portrait" src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir in a suit, outdoors"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
+                    </div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
               <motion.div className="portrait-chip glass gloss chip-tl"
