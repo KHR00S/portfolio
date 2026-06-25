@@ -300,3 +300,20 @@
     .hero-inner{grid-template-columns:1fr;gap:40px}.portrait-wrap{order:-1}
     .about-grid{grid-template-columns:1fr;gap:30px}
   }
+
+/* ============ ADDED MOTION ============ */
+@keyframes gradshift{to{background-position:220% center}}
+.hero h1 .grad{background-size:220% auto;animation:gradshift 6s linear infinite}
+
+/* scroll progress bar */
+.scroll-prog{position:fixed;top:0;left:0;right:0;height:3px;transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent));z-index:300;will-change:transform}
+
+/* animated aurora background */
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.aurora .ab{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+
+@media (prefers-reduced-motion:reduce){
+  .hero h1 .grad{animation:none}
+  .marquee-track{animation:none}
+}

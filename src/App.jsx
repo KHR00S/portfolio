@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
+import {
+  motion, AnimatePresence, useMotionValue, useSpring,
+  useScroll, useTransform, useInView, useReducedMotion, animate,
+} from 'framer-motion'
 import { AWARDS, CERTS, MORE } from './data'
 
 /* ----------------------------- icons (raw SVG) ----------------------------- */
@@ -27,26 +30,23 @@ function Ic({ k }) {
   return <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: I[k] }} />
 }
 
+const EASE = [0.16, 1, 0.3, 1]
+const thumb = (id) => `https://drive.google.com/thumbnail?id=${id}&sz=w800`
+
 /* --------------------------- publications data ----------------------------- */
 const PUBS = [
-  {
-    featured: true, href: 'https://link.springer.com/article/10.1007/s00704-025-05717-3',
+  { featured: true, href: 'https://link.springer.com/article/10.1007/s00704-025-05717-3',
     badges: [['scopus', 'Scopus Q2', true], ['intl', 'Springer', false]],
     title: 'Integration of Machine Learning and Time Series Analysis for Upwelling Prediction in Lake Laut Tawar, Indonesia',
-    venue: 'Theoretical and Applied Climatology — A study based on climate forecasting', date: '15 Aug 2025',
-  },
-  {
-    href: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
+    venue: 'Theoretical and Applied Climatology — A study based on climate forecasting', date: '15 Aug 2025' },
+  { href: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
     badges: [['sinta', 'SINTA 2', false]],
     title: 'Forecasting Upwelling in Lake Maninjau Using VAR, SVM & Dashboard Visualization',
-    venue: 'Jurnal Ilmu Pengetahuan dan Teknologi Komputer (JITK)', date: '02 Dec 2025',
-  },
-  {
-    href: 'https://heca-analitika.com/ijds/article/view/211',
+    venue: 'Jurnal Ilmu Pengetahuan dan Teknologi Komputer (JITK)', date: '02 Dec 2025' },
+  { href: 'https://heca-analitika.com/ijds/article/view/211',
     badges: [['intl', 'International', false]],
     title: 'Forecasting Upwelling Phenomena in Lake Laut Tawar: A Semi-Supervised Learning Approach',
-    venue: 'Infolitika Journal of Data Science (IJDS)', date: '19 Nov 2024',
-  },
+    venue: 'Infolitika Journal of Data Science (IJDS)', date: '19 Nov 2024' },
 ]
 
 const EXPERIENCE = [
@@ -62,23 +62,56 @@ const EXPERIENCE = [
     points: ['Led the research department, coordinating members and research activities.', 'Produced comprehensive research reports supporting club initiatives.'] },
 ]
 
-const ACH_RANK = ' '
+/* ----------------------------- motion helpers ------------------------------ */
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll()
+  const sx = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 })
+  return <motion.div className="scroll-prog" style={{ scaleX: sx }} />
+}
 
-/* ------------------------------- helpers ----------------------------------- */
-const thumb = (id) => `https://drive.google.com/thumbnail?id=${id}&sz=w800`
+function AuroraBg() {
+  const reduce = useReducedMotion()
+  const blob = (style, anim, dur) => (
+    <motion.div className="ab" style={style}
+      animate={reduce ? {} : anim}
+      transition={{ duration: dur, repeat: Infinity, ease: 'easeInOut' }} />
+  )
+  return (
+    <div className="aurora" aria-hidden="true">
+      {blob({ width: 620, height: 620, background: '#3B82F6', top: '-12%', left: '-6%', opacity: 0.42 },
+        { x: [0, 140, -40, 0], y: [0, 90, 180, 0], scale: [1, 1.15, 0.95, 1] }, 24)}
+      {blob({ width: 540, height: 540, background: '#7C3AED', top: '28%', right: '-10%', opacity: 0.32 },
+        { x: [0, -120, 50, 0], y: [0, 130, -70, 0], scale: [1, 0.9, 1.2, 1] }, 28)}
+      {blob({ width: 500, height: 500, background: '#22D3EE', bottom: '-14%', left: '32%', opacity: 0.22 },
+        { x: [0, 90, -70, 0], y: [0, -90, 50, 0], scale: [1, 1.1, 0.92, 1] }, 32)}
+    </div>
+  )
+}
+
+function CountUp({ to, decimals = 0 }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-15%' })
+  const [val, setVal] = useState(0)
+  const reduce = useReducedMotion()
+  useEffect(() => {
+    if (!inView) return
+    if (reduce) { setVal(to); return }
+    const c = animate(0, to, { duration: 1.5, ease: EASE, onUpdate: (v) => setVal(v) })
+    return () => c.stop()
+  }, [inView, to, reduce])
+  return <span ref={ref}>{val.toFixed(decimals)}</span>
+}
 
 /* reveal-on-scroll wrapper */
-function Reveal({ children, delay = 0, className = '', as = 'div', ...rest }) {
+function Reveal({ children, delay = 0, className = '', as = 'div', style, ...rest }) {
   const M = motion[as] || motion.div
   return (
-    <M
-      className={className}
-      initial={{ opacity: 0, y: 26 }}
+    <M className={className} style={style}
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
-      {...rest}
-    >
+      transition={{ duration: 0.65, ease: EASE, delay }}
+      {...rest}>
       {children}
     </M>
   )
@@ -93,50 +126,43 @@ function Magnetic({ as = 'a', className = '', children, ...rest }) {
   const Comp = motion[as] || motion.a
   const fine = typeof window !== 'undefined' && window.matchMedia('(pointer:fine)').matches
   return (
-    <Comp
-      ref={ref}
-      className={className}
-      style={{ x: sx, y: sy }}
+    <Comp ref={ref} className={className} style={{ x: sx, y: sy }}
+      whileHover={{ scale: 1.045 }} whileTap={{ scale: 0.97 }}
       onMouseMove={(e) => {
         if (!fine || !ref.current) return
         const r = ref.current.getBoundingClientRect()
-        x.set((e.clientX - r.left - r.width / 2) * 0.18)
-        y.set((e.clientY - r.top - r.height / 2) * 0.28)
+        x.set((e.clientX - r.left - r.width / 2) * 0.2)
+        y.set((e.clientY - r.top - r.height / 2) * 0.3)
       }}
       onMouseLeave={() => { x.set(0); y.set(0) }}
-      {...rest}
-    >
+      {...rest}>
       {children}
     </Comp>
   )
 }
 
-/* certificate / award card */
-function VCard({ item, isAward, onOpen }) {
+/* certificate / award card with stagger entrance */
+function VCard({ item, isAward, onOpen, index = 0 }) {
   const [failed, setFailed] = useState(false)
   const clickable = !!item.id
-  const open = () => clickable && onOpen(item)
   return (
-    <motion.button
-      type="button"
+    <motion.button type="button"
       className={'vcard glass gloss' + (clickable ? '' : ' static')}
       aria-label={clickable ? `${isAward ? 'View award' : 'View certificate'}: ${item.title}` : item.title}
-      onClick={open}
-      whileHover={clickable ? { y: -7 } : { y: -4 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-    >
+      onClick={() => clickable && onOpen(item)}
+      initial={{ opacity: 0, y: 26, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '0px 0px -6% 0px' }}
+      transition={{ type: 'spring', stiffness: 130, damping: 18, delay: (index % 4) * 0.07 }}
+      whileHover={clickable ? { y: -8, scale: 1.02 } : { y: -4 }}>
       <div className="vthumb">
-        {isAward && item.rank && (
-          <span className="ribbon"><Ic k="trophy" />{item.rank}</span>
-        )}
+        {isAward && item.rank && (<span className="ribbon"><Ic k="trophy" />{item.rank}</span>)}
         {clickable && !failed ? (
           <img src={thumb(item.id)} alt={item.title} loading="lazy" onError={() => setFailed(true)} />
         ) : (
           <div className="ph" style={{ display: 'grid' }}><Ic k={isAward ? 'trophy' : 'cert'} /></div>
         )}
-        {clickable && (
-          <div className="view-ov"><span><Ic k="eye" /> Preview</span></div>
-        )}
+        {clickable && (<div className="view-ov"><span><Ic k="eye" /> Preview</span></div>)}
       </div>
       <div className="vbody">
         <span className="vissuer">{item.issuer}</span>
@@ -158,32 +184,34 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const reduce = useReducedMotion()
 
-  /* theme init + persistence */
+  /* hero parallax */
+  const { scrollY } = useScroll()
+  const heroY = useTransform(scrollY, [0, 600], [0, 130])
+  const heroFade = useTransform(scrollY, [0, 520], [1, 0])
+  const portraitY = useTransform(scrollY, [0, 600], [0, -60])
+
   useEffect(() => {
     let saved = null
     try { saved = localStorage.getItem('theme') } catch (e) {}
-    const t = saved || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light')
-    setTheme(t)
+    setTheme(saved || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'))
   }, [])
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     try { localStorage.setItem('theme', theme) } catch (e) {}
   }, [theme])
 
-  /* nav scroll state + active section */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
     onScroll(); window.addEventListener('scroll', onScroll, { passive: true })
     const spy = new IntersectionObserver(
       (es) => es.forEach((e) => { if (e.isIntersecting) setActive(e.target.id) }),
-      { rootMargin: '-45% 0px -50% 0px' }
-    )
+      { rootMargin: '-45% 0px -50% 0px' })
     NAV.forEach(([, href]) => { const el = document.querySelector(href); if (el) spy.observe(el) })
     return () => { window.removeEventListener('scroll', onScroll); spy.disconnect() }
   }, [])
 
-  /* lock body scroll + ESC close when modal open */
   useEffect(() => {
     document.body.style.overflow = modal ? 'hidden' : ''
     const onKey = (e) => { if (e.key === 'Escape') setModal(null) }
@@ -192,11 +220,16 @@ export default function App() {
   }, [modal])
 
   const totalCerts = CERTS.length + MORE.length
+  const float = reduce ? {} : { y: [0, -14, 0] }
 
   return (
     <>
+      <ScrollProgress />
+      <AuroraBg />
+
       {/* NAV */}
-      <header className="nav" id="nav">
+      <motion.header className="nav" id="nav"
+        initial={{ y: -70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6, ease: EASE }}>
         <div className={'nav-inner' + (scrolled ? ' scrolled' : '')}>
           <a href="#home" className="brand"><span className="dot" />Fakhrus&nbsp;Syakir</a>
           <nav className="nav-links">
@@ -204,18 +237,19 @@ export default function App() {
               <a key={href} href={href} className={active === href.slice(1) ? 'active' : ''}>{label}</a>
             ))}
           </nav>
-          <button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle dark mode">
+          <motion.button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            aria-label="Toggle dark mode" whileHover={{ scale: 1.1, rotate: 12 }} whileTap={{ scale: 0.9 }}>
             <Ic k={theme === 'dark' ? 'moon' : 'sun'} />
-          </button>
+          </motion.button>
         </div>
-      </header>
+      </motion.header>
 
       <main id="home">
         {/* HERO */}
         <section className="hero">
           <div className="grid-bg" />
           <div className="wrap hero-inner">
-            <div className="hero-text">
+            <motion.div className="hero-text" style={{ y: heroY, opacity: heroFade }}>
               <Reveal as="span" className="badge glass gloss"><span className="pulse" />Currently @ PT Mastersystem Infotama · Junior Network Engineer</Reveal>
               <Reveal as="span" className="eyebrow" delay={0.05}>Network Engineer · ML Researcher</Reveal>
               <Reveal as="h1" delay={0.1}>Fakhrus Syakir<br /><span className="grad">Networks, power &amp; intelligence</span></Reveal>
@@ -226,19 +260,30 @@ export default function App() {
                 <Magnetic className="btn btn-ghost" href="https://drive.google.com/file/d/1YPFNgxAVrZB7kJWr5pa77JsvOrpjjLHU/view" target="_blank" rel="noopener"><Ic k="download" /><span>Download CV</span></Magnetic>
               </Reveal>
               <Reveal className="socials" delay={0.3}>
-                <a className="glass gloss" href="https://www.linkedin.com/in/fakhrus-syakir-65bb72205" target="_blank" rel="noopener" aria-label="LinkedIn"><Ic k="linkedin" /></a>
-                <a className="glass gloss" href="mailto:fakhroosyakir@gmail.com" aria-label="Email"><Ic k="mail" /></a>
-                <a className="glass gloss" href="tel:+628116881902" aria-label="Phone"><Ic k="phone" /></a>
+                {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email'], ['phone', 'tel:+628116881902', 'Phone']].map(([k, href, label]) => (
+                  <motion.a key={k} className="glass gloss" href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}
+                    whileHover={{ y: -4, scale: 1.12, rotate: -4 }} whileTap={{ scale: 0.92 }}><Ic k={k} /></motion.a>
+                ))}
               </Reveal>
-            </div>
+            </motion.div>
             <Reveal className="portrait-wrap" delay={0.15}>
-              <div className="portrait-glow" />
-              <div className="portrait-frame gloss">
-                <img className="portrait" src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir in a suit, outdoors"
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
-              </div>
-              <div className="portrait-chip glass gloss chip-tl"><span className="num">3.28</span><span className="lbl">GPA<br />B.Eng (EE)</span></div>
-              <div className="portrait-chip glass gloss chip-br"><span className="num">3</span><span className="lbl">Journal<br />Publications</span></div>
+              <motion.div style={{ y: portraitY }}>
+                <motion.div animate={float} transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }} style={{ position: 'relative' }}>
+                  <div className="portrait-glow" />
+                  <div className="portrait-frame gloss">
+                    <img className="portrait" src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir in a suit, outdoors"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
+                  </div>
+                </motion.div>
+              </motion.div>
+              <motion.div className="portrait-chip glass gloss chip-tl"
+                animate={reduce ? {} : { y: [0, 8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+                <span className="num"><CountUp to={3.28} decimals={2} /></span><span className="lbl">GPA<br />B.Eng (EE)</span>
+              </motion.div>
+              <motion.div className="portrait-chip glass gloss chip-br"
+                animate={reduce ? {} : { y: [0, -8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}>
+                <span className="num"><CountUp to={3} /></span><span className="lbl">Journal<br />Publications</span>
+              </motion.div>
             </Reveal>
           </div>
 
@@ -248,9 +293,7 @@ export default function App() {
               {[...Array(2)].flatMap((_, n) => [
                 'Network Engineering', 'Routing & Switching', 'Machine Learning', 'HMI Commissioning',
                 'Time Series Forecasting', 'ETAP · PVsyst · CX-One', 'Python · RStudio', 'Power System Analysis',
-              ].map((t, i) => (
-                <span className="marquee-item" key={n + '-' + i}><span className="d" />{t}</span>
-              )))}
+              ].map((t, i) => (<span className="marquee-item" key={n + '-' + i}><span className="d" />{t}</span>)))}
             </div>
           </div></div>
         </section>
@@ -267,17 +310,24 @@ export default function App() {
                 <div className="skills-wrap">
                   <div className="skills-title">Core toolbox</div>
                   <div className="tags">
-                    {['Routing & Switching', 'Network Infrastructure', 'ETAP', 'PVsyst', 'CX-One', 'Python', 'RStudio', 'Streamlit', 'Time Series', 'TensorFlow'].map((t) => (
-                      <span className="tag glass gloss" key={t}>{t}</span>
+                    {['Routing & Switching', 'Network Infrastructure', 'ETAP', 'PVsyst', 'CX-One', 'Python', 'RStudio', 'Streamlit', 'Time Series', 'TensorFlow'].map((t, i) => (
+                      <motion.span className="tag glass gloss" key={t}
+                        initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: i * 0.04 }} whileHover={{ y: -3, scale: 1.06 }}>{t}</motion.span>
                     ))}
                   </div>
                 </div>
               </Reveal>
               <Reveal className="facts" delay={0.1}>
-                <div className="fact glass gloss"><span className="ic"><Ic k="server" /></span><div><div className="k">Current role</div><div className="v">Junior Network Engineer</div><div className="k" style={{ textTransform: 'none' }}>PT Mastersystem Infotama · 2026–Present</div></div></div>
-                <div className="fact glass gloss"><span className="ic"><Ic k="cap" /></span><div><div className="k">Education</div><div className="v">B.Eng Electrical Engineering</div><div className="k" style={{ textTransform: 'none' }}>Syiah Kuala University · 2021–2025</div></div></div>
-                <div className="fact glass gloss"><span className="ic"><Ic k="check" /></span><div><div className="k">Focus</div><div className="v">Networks · Power · Machine Learning</div></div></div>
-                <div className="fact glass gloss"><span className="ic"><Ic k="mail" /></span><div><div className="k">Contact</div><div className="v">fakhroosyakir@gmail.com</div></div></div>
+                {[['server', 'Current role', 'Junior Network Engineer', 'PT Mastersystem Infotama · 2026–Present'],
+                  ['cap', 'Education', 'B.Eng Electrical Engineering', 'Syiah Kuala University · 2021–2025'],
+                  ['check', 'Focus', 'Networks · Power · Machine Learning', null],
+                  ['mail', 'Contact', 'fakhroosyakir@gmail.com', null]].map(([k, kk, v, sub], i) => (
+                  <motion.div className="fact glass gloss" key={kk} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <span className="ic"><Ic k={k} /></span>
+                    <div><div className="k">{kk}</div><div className="v">{v}</div>{sub && <div className="k" style={{ textTransform: 'none' }}>{sub}</div>}</div>
+                  </motion.div>
+                ))}
               </Reveal>
             </div>
           </div>
@@ -287,16 +337,18 @@ export default function App() {
         <section className="block" id="experience">
           <div className="wrap">
             <Reveal className="sec-head"><span className="eyebrow">Experience</span><h2>A path across networks, plants &amp; labs</h2></Reveal>
-            <Reveal className="timeline">
+            <div className="timeline">
               {EXPERIENCE.map((e, i) => (
-                <div className={'tl-item' + (e.now ? ' now' : '')} key={i}>
+                <motion.div className={'tl-item' + (e.now ? ' now' : '')} key={i}
+                  initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+                  transition={{ duration: 0.55, ease: EASE, delay: i * 0.06 }}>
                   <div className="tl-when">{e.when}{e.now && <span className="tl-now-badge">Now</span>}</div>
                   <div className="tl-role">{e.role}</div>
                   <div className="tl-org">{e.org}</div>
                   <ul className="tl-list">{e.points.map((p, j) => <li key={j}>{p}</li>)}</ul>
-                </div>
+                </motion.div>
               ))}
-            </Reveal>
+            </div>
           </div>
         </section>
 
@@ -307,8 +359,8 @@ export default function App() {
             <div className="pub-wrap">
               {PUBS.filter((p) => p.featured).map((p) => (
                 <motion.a className="pub-card pub-featured gloss shine" key={p.href} href={p.href} target="_blank" rel="noopener"
-                  initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} whileHover={{ y: -7 }}>
+                  initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+                  transition={{ duration: 0.6, ease: EASE }} whileHover={{ y: -9, scale: 1.01 }}>
                   <span className="fx a" /><span className="fx b" />
                   <div className="pub-quote">“</div>
                   <div className="pub-num">Featured · Journal Article</div>
@@ -321,8 +373,8 @@ export default function App() {
               <div className="pub-side">
                 {PUBS.filter((p) => !p.featured).map((p, i) => (
                   <motion.a className="pub-card glass gloss shine" key={p.href} href={p.href} target="_blank" rel="noopener"
-                    initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: i * 0.08 }} whileHover={{ y: -7 }}>
+                    initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+                    transition={{ duration: 0.6, ease: EASE, delay: i * 0.1 }} whileHover={{ y: -7, scale: 1.015 }}>
                     <div className="pub-badges">{p.badges.map(([cls, label]) => <span className={'pill ' + cls} key={label}>{label}</span>)}</div>
                     <h3>{p.title}</h3>
                     <p className="pub-venue">{p.venue}</p>
@@ -338,9 +390,9 @@ export default function App() {
         <section className="block" id="awards">
           <div className="wrap">
             <Reveal className="sec-head"><span className="eyebrow">Awards</span><h2>Competition highlights</h2><p>Click any award to view the certificate in full.</p></Reveal>
-            <Reveal className="vgrid">
-              {AWARDS.map((a) => <VCard key={a.id || a.title} item={a} isAward onOpen={setModal} />)}
-            </Reveal>
+            <div className="vgrid">
+              {AWARDS.map((a, i) => <VCard key={a.id || a.title} item={a} isAward index={i} onOpen={setModal} />)}
+            </div>
           </div>
         </section>
 
@@ -348,15 +400,15 @@ export default function App() {
         <section className="block" id="certifications">
           <div className="wrap">
             <Reveal className="sec-head"><span className="eyebrow">Certifications</span><h2>Credentials &amp; competencies</h2><p>A selection of my strongest certificates — click any to preview it in full.</p></Reveal>
-            <Reveal className="vgrid">
-              {CERTS.map((c) => <VCard key={c.id} item={c} onOpen={setModal} />)}
-            </Reveal>
+            <div className="vgrid">
+              {CERTS.map((c, i) => <VCard key={c.id} item={c} index={i} onOpen={setModal} />)}
+            </div>
             <AnimatePresence initial={false}>
               {showAll && (
                 <motion.div className="vgrid" style={{ marginTop: 20, overflow: 'hidden' }}
                   initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
-                  {MORE.map((c) => <VCard key={c.id} item={c} onOpen={setModal} />)}
+                  transition={{ duration: 0.45, ease: EASE }}>
+                  {MORE.map((c, i) => <VCard key={c.id} item={c} index={i} onOpen={setModal} />)}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -403,7 +455,7 @@ export default function App() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} />
             <motion.div className="modal-panel"
               initial={{ opacity: 0, scale: 0.96, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 10 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}>
+              transition={{ duration: 0.28, ease: EASE }}>
               <div className="modal-bar">
                 <h3>{modal.title}</h3>
                 <div className="actions">
