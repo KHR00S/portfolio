@@ -317,3 +317,42 @@
   .hero h1 .grad{animation:none}
   .marquee-track{animation:none}
 }
+
+/* ============ MINIMALIST HERO ============ */
+.mh{position:relative;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:36px;padding:120px 0 44px;overflow:hidden}
+.mh-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:28px}
+.mh-left{max-width:300px}
+.mh-kicker{font-size:.76rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:block}
+.mh-intro{color:var(--muted-fg);font-size:1rem;line-height:1.7}
+.mh-readmore{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-weight:700;font-size:.92rem;color:var(--fg);border-bottom:1.5px solid var(--accent);padding-bottom:2px}
+.mh-readmore svg{width:15px;height:15px;transition:transform .2s}
+.mh-readmore:hover svg{transform:translateX(3px)}
+.mh-center{position:relative;display:grid;place-items:center;min-height:min(66vh,500px)}
+.mh-circle{position:absolute;width:min(400px,78vw);aspect-ratio:1;border-radius:50%;z-index:0;
+  background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent) 52%,var(--accent-2));
+  box-shadow:0 50px 130px -34px color-mix(in srgb,var(--accent) 75%,transparent)}
+.mh-photo{position:relative;z-index:1;width:min(280px,62vw);aspect-ratio:1;border-radius:50%;object-fit:cover;object-position:50% 32%;
+  filter:grayscale(1) contrast(1.08) brightness(1.04);border:7px solid var(--surface);box-shadow:0 30px 70px -20px rgba(0,0,0,.55)}
+.mh-right{justify-self:end;text-align:right;position:relative;z-index:2}
+.mh-big{font-family:var(--font-head);font-weight:700;font-size:clamp(3.2rem,8.5vw,6.8rem);line-height:.84;letter-spacing:-.04em;color:var(--fg)}
+.mh-big em{font-style:normal;color:var(--accent)}
+.mh-foot{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.mh-socials{display:flex;gap:18px}
+.mh-socials a{color:var(--muted-fg);transition:color .2s,transform .2s;display:grid;place-items:center}
+.mh-socials a:hover{color:var(--accent);transform:translateY(-3px)}
+.mh-socials svg{width:20px;height:20px}
+.mh-loc{font-size:.85rem;font-weight:700;color:var(--muted-fg);letter-spacing:.02em}
+@media(max-width:860px){
+  .mh{min-height:auto;padding:110px 0 36px}
+  .mh-main{grid-template-columns:1fr;justify-items:center;text-align:center;gap:26px}
+  .mh-center{order:1;min-height:auto}
+  .mh-left{order:2;max-width:44ch}
+  .mh-right{order:3;justify-self:center}
+  .mh-readmore{margin-inline:auto}
+}
+
+/* professional portrait in About */
+.about-photo{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-md);margin-bottom:16px;aspect-ratio:4/5}
+.about-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 16%}
+.about-photo .tagpro{position:absolute;left:12px;bottom:12px;background:var(--glass-strong);backdrop-filter:blur(10px);border:1px solid var(--glass-border);
+  padding:6px 12px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}

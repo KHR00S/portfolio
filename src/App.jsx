@@ -25,6 +25,7 @@ const I = {
   chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   gem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>',
+  github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>',
 }
 function Ic({ k }) {
   return <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: I[k] }} />
@@ -258,55 +259,48 @@ export default function App() {
       </motion.header>
 
       <main id="home">
-        {/* HERO */}
-        <section className="hero">
-          <div className="grid-bg" />
-          <div className="wrap hero-inner">
-            <motion.div className="hero-text" style={isDesktop ? { y: heroY, opacity: heroFade } : undefined}>
-              <Reveal as="span" className="badge glass gloss"><span className="pulse" />Currently @ PT Mastersystem Infotama · Junior Network Engineer</Reveal>
-              <Reveal as="span" className="eyebrow" delay={0.05}>Network Engineer · ML Researcher</Reveal>
-              <Reveal as="h1" delay={0.1}>Fakhrus Syakir<br /><span className="grad">Networks, power &amp; intelligence</span></Reveal>
-              <Reveal as="p" className="role" delay={0.15}>Junior Network Engineer &amp; Machine Learning researcher · Electrical Engineering graduate</Reveal>
-              <Reveal as="p" className="lede" delay={0.2}>I build and support enterprise network infrastructure, with an engineering foundation spanning power systems and HMI commissioning — and published machine-learning research on environmental forecasting.</Reveal>
-              <Reveal className="cta-row" delay={0.25}>
-                <Magnetic className="btn btn-primary" href="#publications"><Ic k="book" /><span>View Research</span></Magnetic>
-                <Magnetic className="btn btn-ghost" href="https://drive.google.com/file/d/1YPFNgxAVrZB7kJWr5pa77JsvOrpjjLHU/view" target="_blank" rel="noopener"><Ic k="download" /><span>Download CV</span></Magnetic>
-              </Reveal>
-              <Reveal className="socials" delay={0.3}>
-                {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email'], ['phone', 'tel:+628116881902', 'Phone']].map(([k, href, label]) => (
-                  <motion.a key={k} className="glass gloss" href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}
-                    whileHover={{ y: -4, scale: 1.12, rotate: -4 }} whileTap={{ scale: 0.92 }}><Ic k={k} /></motion.a>
-                ))}
-              </Reveal>
+        {/* HERO — minimalist */}
+        <section className="mh" id="home-hero">
+          <div className="wrap mh-main">
+            {/* left intro */}
+            <motion.div className="mh-left"
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.9, ease: EASE }}>
+              <span className="mh-kicker">Network Engineer · ML Researcher</span>
+              <p className="mh-intro">Junior Network Engineer &amp; Machine Learning researcher — building reliable infrastructure and publishing research on environmental forecasting.</p>
+              <a href="#about" className="mh-readmore">Read more <Ic k="ext" /></a>
             </motion.div>
-            <Reveal className="portrait-wrap" delay={0.15}
-              onMouseMove={isDesktop ? (e) => {
-                const r = e.currentTarget.querySelector('.portrait-frame').getBoundingClientRect()
-                tiltY.set(((e.clientX - r.left) / r.width - 0.5) * 16)
-                tiltX.set(-((e.clientY - r.top) / r.height - 0.5) * 16)
-              } : undefined}
-              onMouseLeave={() => { tiltX.set(0); tiltY.set(0) }}>
-              <motion.div style={isDesktop ? { y: portraitY } : undefined}>
-                <motion.div animate={float} transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }} style={{ position: 'relative', perspective: 1000 }}>
-                  <motion.div style={{ rotateX: tiltX, rotateY: tiltY, transformStyle: 'preserve-3d' }}>
-                    <div className="portrait-glow" />
-                    <div className="portrait-frame gloss">
-                      <img className="portrait" src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir in a suit, outdoors"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-              <motion.div className="portrait-chip glass gloss chip-tl"
-                animate={reduce ? {} : { y: [0, 8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
-                <span className="num"><CountUp to={3.28} decimals={2} /></span><span className="lbl">GPA<br />B.Eng (EE)</span>
-              </motion.div>
-              <motion.div className="portrait-chip glass gloss chip-br"
-                animate={reduce ? {} : { y: [0, -8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}>
-                <span className="num"><CountUp to={3} /></span><span className="lbl">Journal<br />Publications</span>
-              </motion.div>
-            </Reveal>
+
+            {/* center portrait + accent circle */}
+            <div className="mh-center">
+              <motion.div className="mh-circle"
+                initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }} />
+              <motion.img className="mh-photo" src={thumb('1cbIZBWx8EJ0bNwsSfiAcVeueSmO9RAGr')}
+                alt="Fakhrus Syakir — black and white portrait"
+                initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+                whileHover={isDesktop ? { scale: 1.03 } : undefined}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix') }} />
+            </div>
+
+            {/* right giant type */}
+            <motion.div className="mh-right"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1, ease: EASE }}>
+              <h1 className="mh-big">net<br /><em>work.</em></h1>
+            </motion.div>
           </div>
+
+          {/* footer row: socials + location */}
+          <motion.div className="wrap mh-foot"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.3 }}>
+            <div className="mh-socials">
+              {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['github', 'https://github.com/KHR00S', 'GitHub'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email']].map(([k, href, label]) => (
+                <motion.a key={k} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}
+                  whileHover={{ y: -3, scale: 1.1 }} whileTap={{ scale: 0.92 }}><Ic k={k} /></motion.a>
+              ))}
+            </div>
+            <span className="mh-loc">Banda Aceh · Jakarta, ID</span>
+          </motion.div>
 
           {/* MARQUEE */}
           <div className="wrap"><div className="marquee glass gloss" aria-hidden="true">
@@ -340,6 +334,11 @@ export default function App() {
                 </div>
               </Reveal>
               <Reveal className="facts" delay={0.1}>
+                <motion.div className="about-photo" whileHover={{ scale: 1.015 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }}>
+                  <img src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir — professional portrait in a suit"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
+                  <span className="tagpro">Professional</span>
+                </motion.div>
                 {[['server', 'Current role', 'Junior Network Engineer', 'PT Mastersystem Infotama · 2026–Present'],
                   ['cap', 'Education', 'B.Eng Electrical Engineering', 'Syiah Kuala University · 2021–2025'],
                   ['check', 'Focus', 'Networks · Power · Machine Learning', null],
