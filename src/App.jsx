@@ -237,7 +237,6 @@ export default function App() {
   return (
     <>
       <ScrollProgress />
-      <AuroraBg />
 
       {/* NAV */}
       <motion.header className="nav" id="nav"
@@ -270,17 +269,18 @@ export default function App() {
               <a href="#about" className="mh-readmore">Read more <Ic k="ext" /></a>
             </motion.div>
 
-            {/* center portrait + accent circle */}
+            {/* center portrait cutout + accent circle */}
             <div className="mh-center">
               <motion.div className="mh-circle"
                 initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }} />
-              <motion.img className="mh-photo" src={thumb('1cbIZBWx8EJ0bNwsSfiAcVeueSmO9RAGr')}
-                alt="Fakhrus Syakir — black and white portrait"
-                initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-                whileHover={isDesktop ? { scale: 1.03 } : undefined}
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix') }} />
+              <div className="mh-photo-wrap">
+                <motion.img className="mh-photo" src={`${import.meta.env.BASE_URL}me-cutout.png`}
+                  alt="Fakhrus Syakir — black and white portrait"
+                  initial={{ opacity: 0, y: 44 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+                  whileHover={isDesktop ? { scale: 1.03 } : undefined} />
+              </div>
             </div>
 
             {/* right giant type */}
