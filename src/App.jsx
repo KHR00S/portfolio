@@ -181,7 +181,7 @@ const NAV = [
 ]
 
 export default function App() {
-  const [theme, setTheme] = useState('light')
+  const [theme, setTheme] = useState('dark')
   const [modal, setModal] = useState(null)
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState('')
@@ -200,7 +200,7 @@ export default function App() {
   useEffect(() => {
     let saved = null
     try { saved = localStorage.getItem('theme') } catch (e) {}
-    setTheme(saved || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'))
+    setTheme(saved || 'dark')
   }, [])
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
