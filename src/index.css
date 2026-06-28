@@ -327,8 +327,7 @@
 .mh-circle{position:absolute;inset:0;border-radius:50%;z-index:0;
   background:radial-gradient(circle at 34% 28%,#ECFCCB,#A3E635 50%,#84CC16);
   box-shadow:0 50px 130px -34px rgba(132,204,22,.6)}
-.mh-photo-wrap{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);width:108%;max-width:none;z-index:1;pointer-events:none;
-  -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 99%);mask-image:linear-gradient(180deg,#000 80%,transparent 99%)}
+.mh-photo-wrap{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);width:108%;max-width:none;z-index:1;pointer-events:none}
 .mh-photo{width:100%;height:auto;display:block;filter:grayscale(1) contrast(1.06) brightness(1.02) drop-shadow(0 24px 40px rgba(0,0,0,.28))}
 @media(min-width:861px){.mh-center{width:clamp(340px,30vw,420px)}}
 .mh-right{justify-self:end;text-align:right;position:relative;z-index:2}
