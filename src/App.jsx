@@ -335,11 +335,6 @@ export default function App() {
                 </div>
               </Reveal>
               <Reveal className="facts" delay={0.1}>
-                <motion.div className="about-photo" whileHover={{ scale: 1.015 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }}>
-                  <img src={thumb('1w4hF-FEUYgEmC9XkHjY8l_YTK3PpKKix')} alt="Fakhrus Syakir — professional portrait in a suit"
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = thumb('1n5eqDpuS15Ndy-B88QcQih67C0cippwD') }} />
-                  <span className="tagpro">Professional</span>
-                </motion.div>
                 {[['server', 'Current role', 'Junior Network Engineer', 'PT Mastersystem Infotama · 2026–Present'],
                   ['cap', 'Education', 'B.Eng Electrical Engineering', 'Syiah Kuala University · 2021–2025'],
                   ['check', 'Focus', 'Networks · Power · Machine Learning', null],
