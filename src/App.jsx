@@ -1,378 +1,528 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  motion, AnimatePresence, useMotionValue, useSpring,
-  useScroll, useInView, useReducedMotion, animate,
-} from 'framer-motion'
-import { AWARDS, CERTS, MORE } from './data'
-import PortfolioHero from '@/components/ui/portfolio-hero'
-
-/* ----------------------------- icons (raw SVG) ----------------------------- */
-const I = {
-  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
-  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
-  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
-  linkedin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>',
-  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>',
-  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>',
-  cap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-4.5-8-11.8A4.2 4.2 0 0 1 12 6a4.2 4.2 0 0 1 8 3.2C20 16.5 12 21 12 21z"/></svg>',
-  server: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>',
-  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-  cert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="10" cy="13" r="2"/><path d="m9 17-1 4 2-1 2 1-1-4"/></svg>',
-  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
-  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
-  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
-  gem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg>',
-  github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>',
-  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>',
-}
-function Ic({ k }) {
-  return <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: I[k] }} />
-}
+import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const EASE = [0.16, 1, 0.3, 1]
-const thumb = (id) => `https://drive.google.com/thumbnail?id=${id}&sz=w800`
 
-/* --------------------------- publications data ----------------------------- */
-const PUBS = [
-  { featured: true, href: 'https://link.springer.com/article/10.1007/s00704-025-05717-3',
-    badges: [['scopus', 'Scopus Q2', true], ['intl', 'Springer', false]],
-    title: 'Integration of Machine Learning and Time Series Analysis for Upwelling Prediction in Lake Laut Tawar, Indonesia',
-    venue: 'Theoretical and Applied Climatology — A study based on climate forecasting', date: '15 Aug 2025' },
-  { href: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
-    badges: [['sinta', 'SINTA 2', false]],
-    title: 'Forecasting Upwelling in Lake Maninjau Using VAR, SVM & Dashboard Visualization',
-    venue: 'Jurnal Ilmu Pengetahuan dan Teknologi Komputer (JITK)', date: '02 Dec 2025' },
-  { href: 'https://heca-analitika.com/ijds/article/view/211',
-    badges: [['intl', 'International', false]],
-    title: 'Forecasting Upwelling Phenomena in Lake Laut Tawar: A Semi-Supervised Learning Approach',
-    venue: 'Infolitika Journal of Data Science (IJDS)', date: '19 Nov 2024' },
-]
-
-const EXPERIENCE = [
-  { now: true, when: '2026 – Present', role: 'Junior Network Engineer', org: 'PT Mastersystem Infotama · Jakarta',
-    points: ['Configure, deploy, and support enterprise network infrastructure (routing & switching).', 'Assist with implementation, monitoring, and troubleshooting of LAN/WAN and network security devices.', 'Support client network operations and maintenance as part of the engineering team.'] },
-  { when: 'January 2026 – March 2026', role: 'Commissioning Team — HMI Installation', org: 'PT. Kumatsu Gata Group · LPG Compressor K-6405 (PT Perta Arun Gas)',
-    points: ['Installed and configured HMI panels for compressor control systems.', 'Supported integration between PLC, field instruments, and the HMI interface.', 'Ran commissioning, system testing, and troubleshooting against engineering drawings.'] },
-  { when: 'December 2023 – January 2024', role: 'Electrical Engineering Intern', org: 'PT. Perta Arun Gas · Lhokseumawe, Aceh',
-    points: ['Reviewed electrical single-line diagrams.', 'Assisted in troubleshooting and repairing relay control systems on the production line.', 'Supported cathodic protection measurements for water-intake basin structures.'] },
-  { when: '2024', role: 'Machine Learning Intern', org: 'GoDentist · Bangkit led by Google',
-    points: ['Developed an ML model for dental disease detection achieving 98% accuracy.', 'Optimized database storage, improving data efficiency and management.'] },
-  { when: 'May 2023 – June 2025', role: 'Research Manager', org: 'KSPM USK Investment Club',
-    points: ['Led the research department, coordinating members and research activities.', 'Produced comprehensive research reports supporting club initiatives.'] },
-]
-
-/* ----------------------------- motion helpers ------------------------------ */
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll()
-  const sx = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 })
-  return <motion.div className="scroll-prog" style={{ scaleX: sx }} />
+function GithubIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2z" />
+    </svg>
+  )
 }
 
-function AuroraBg() {
-  const reduce = useReducedMotion()
-  const blob = (style, anim, dur) => (
-    <motion.div className="ab" style={style}
-      animate={reduce ? {} : anim}
-      transition={{ duration: dur, repeat: Infinity, ease: 'easeInOut' }} />
-  )
+/* ---------------------------------- data ---------------------------------- */
+
+const SKILLS = [
+  { title: 'Frontend Tools', items: 'React, JavaScript, TypeScript, Tailwind CSS, Framer Motion, Vite' },
+  { title: 'Backend Tools', items: 'Python, TensorFlow, Streamlit, Node.js, MySQL, Firebase' },
+  { title: 'UI Libraries', items: 'shadcn/ui, Radix UI, Material UI, Chart.js, Plotly' },
+]
+
+const SONGS = [
+  { title: 'Blinding Lights', artist: 'The Weeknd', hue: 'from-red-500/70 to-orange-600/60' },
+  { title: 'As It Was', artist: 'Harry Styles', hue: 'from-sky-400/70 to-indigo-600/60' },
+  { title: 'Glimpse of Us', artist: 'Joji', hue: 'from-zinc-400/70 to-zinc-700/60' },
+  { title: 'Monokrom', artist: 'Tulus', hue: 'from-amber-400/70 to-yellow-700/60' },
+  { title: 'About You', artist: 'The 1975', hue: 'from-fuchsia-500/70 to-purple-700/60' },
+  { title: 'Secukupnya', artist: 'Hindia', hue: 'from-teal-400/70 to-emerald-700/60' },
+  { title: 'Die With A Smile', artist: 'Lady Gaga & Bruno Mars', hue: 'from-rose-500/70 to-red-800/60' },
+  { title: 'Sunsetz', artist: 'Cigarettes After Sex', hue: 'from-slate-400/70 to-slate-700/60' },
+  { title: 'Evaluasi', artist: 'Hindia', hue: 'from-lime-400/70 to-green-700/60' },
+  { title: 'Nightcall', artist: 'Kavinsky', hue: 'from-violet-500/70 to-blue-800/60' },
+]
+
+const PROJECTS = [
+  {
+    name: 'Upwelling Prediction Dashboard',
+    desc: 'Machine-learning dashboard forecasting upwelling events in Lake Laut Tawar — the research behind my Scopus Q2 publication in Theoretical and Applied Climatology.',
+    tags: ['PYTHON', 'STREAMLIT', 'TENSORFLOW'],
+    github: 'https://github.com/KHR00S',
+    link: 'https://link.springer.com/article/10.1007/s00704-025-05717-3',
+    hue: 'from-cyan-500/40 to-blue-800/40',
+  },
+  {
+    name: 'Lake Maninjau Forecasting',
+    desc: 'Multivariate time-series forecasting of upwelling with VAR & SVM models, visualized through an interactive analytics dashboard. Published in JITK (SINTA 2).',
+    tags: ['PYTHON', 'SCIKIT-LEARN', 'PLOTLY'],
+    github: 'https://github.com/KHR00S',
+    link: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
+    hue: 'from-emerald-500/40 to-teal-800/40',
+  },
+  {
+    name: 'GoDentist Disease Detection',
+    desc: 'Deep-learning model detecting dental diseases from images at 98% accuracy — built during Bangkit Academy led by Google, Tokopedia, Gojek & Traveloka.',
+    tags: ['TENSORFLOW', 'KERAS', 'FLASK'],
+    github: 'https://github.com/KHR00S',
+    link: 'https://github.com/KHR00S',
+    hue: 'from-rose-500/40 to-pink-800/40',
+  },
+  {
+    name: 'Personal Portfolio',
+    desc: 'The site you are looking at — a dark editorial portfolio with scroll-triggered motion, marquees and a custom cursor. Designed to feel premium and fast.',
+    tags: ['REACT', 'TAILWIND CSS', 'FRAMER MOTION'],
+    github: 'https://github.com/KHR00S/portfolio',
+    link: 'https://khr00s.github.io/portfolio/',
+    hue: 'from-amber-500/40 to-orange-800/40',
+  },
+  {
+    name: 'AI Research Chatbot',
+    desc: 'A conversational assistant that answers questions over research papers and datasets, built with retrieval-augmented generation and a lightweight web UI.',
+    tags: ['PYTHON', 'NLP', 'STREAMLIT'],
+    github: 'https://github.com/KHR00S',
+    link: 'https://github.com/KHR00S',
+    hue: 'from-violet-500/40 to-purple-800/40',
+  },
+  {
+    name: 'PLTS On-Grid 1.8 MWp',
+    desc: 'Design & simulation of a 1.8 MWp on-grid solar power plant — array sizing, yield simulation and single-line diagrams for a utility-scale installation.',
+    tags: ['PVSYST', 'ETAP', 'AUTOCAD'],
+    github: 'https://github.com/KHR00S',
+    link: 'https://github.com/KHR00S',
+    hue: 'from-yellow-500/40 to-amber-800/40',
+  },
+]
+
+const TESTIMONIALS = [
+  { quote: 'Fakhrus turned our messy sensor data into a forecasting dashboard the whole team actually uses. Fast, precise, and calm under deadline pressure.', name: 'RESEARCH SUPERVISOR', role: 'Environmental Engineering Lab · USK' },
+  { quote: 'One of the most reliable engineers in the cohort. His ML model hit 98% accuracy and he still found time to help everyone else debug theirs.', name: 'BANGKIT MENTOR', role: 'Machine Learning Path · Google Bangkit' },
+  { quote: 'He reads a single-line diagram as fluently as he reads Python. Rare to find someone comfortable on the plant floor and in a Jupyter notebook.', name: 'SITE ENGINEER', role: 'PT Perta Arun Gas' },
+  { quote: 'Gave him the hardest commissioning checklist we had. He finished early, documented everything, and the HMI has run clean since.', name: 'PROJECT LEAD', role: 'HMI Commissioning · Kumatsu Gata Group' },
+  { quote: 'Our research reports went from good to award-winning under his direction. First place was not an accident.', name: 'CLUB PRESIDENT', role: 'KSPM USK Investment Club' },
+  { quote: 'Quietly ships. Every network cutover he assisted on went smoother than planned, and clients noticed.', name: 'SENIOR ENGINEER', role: 'PT Mastersystem Infotama' },
+]
+
+const CAL_SLOTS = ['09:00', '10:30', '13:00', '15:30', '19:00', '20:30']
+
+/* ------------------------------- primitives ------------------------------- */
+
+function Reveal({ children, className = '', delay = 0, y = 36 }) {
   return (
-    <div className="aurora" aria-hidden="true">
-      {blob({ width: 620, height: 620, background: '#3B82F6', top: '-12%', left: '-6%', opacity: 0.42 },
-        { x: [0, 140, -40, 0], y: [0, 90, 180, 0], scale: [1, 1.15, 0.95, 1] }, 24)}
-      {blob({ width: 540, height: 540, background: '#7C3AED', top: '28%', right: '-10%', opacity: 0.32 },
-        { x: [0, -120, 50, 0], y: [0, 130, -70, 0], scale: [1, 0.9, 1.2, 1] }, 28)}
-      {blob({ width: 500, height: 500, background: '#22D3EE', bottom: '-14%', left: '32%', opacity: 0.22 },
-        { x: [0, 90, -70, 0], y: [0, -90, 50, 0], scale: [1, 1.1, 0.92, 1] }, 32)}
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '0px 0px -12% 0px' }}
+      transition={{ duration: 0.8, ease: EASE, delay }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function Label({ children, className = '' }) {
+  return (
+    <div className={`text-[11px] font-medium uppercase tracking-[0.3em] text-warm ${className}`}>
+      {children}
     </div>
   )
 }
 
-function CountUp({ to, decimals = 0 }) {
+function CursorDot() {
   const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-15%' })
-  const [val, setVal] = useState(0)
   const reduce = useReducedMotion()
   useEffect(() => {
-    if (!inView) return
-    if (reduce) { setVal(to); return }
-    const c = animate(0, to, { duration: 1.5, ease: EASE, onUpdate: (v) => setVal(v) })
-    return () => c.stop()
-  }, [inView, to, reduce])
-  return <span ref={ref}>{val.toFixed(decimals)}</span>
+    if (reduce) return
+    const dot = ref.current
+    if (!dot) return
+    const move = (e) => {
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`
+      const t = e.target.closest('a, button')
+      dot.classList.toggle('grow', !!t)
+    }
+    window.addEventListener('mousemove', move, { passive: true })
+    return () => window.removeEventListener('mousemove', move)
+  }, [reduce])
+  if (reduce) return null
+  return <div ref={ref} className="cursor-dot" aria-hidden="true" />
 }
 
-/* reveal-on-scroll wrapper */
-function Reveal({ children, delay = 0, className = '', as = 'div', style, ...rest }) {
-  const M = motion[as] || motion.div
-  return (
-    <M className={className} style={style}
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-      transition={{ duration: 0.65, ease: EASE, delay }}
-      {...rest}>
-      {children}
-    </M>
-  )
-}
+/* --------------------------------- sections -------------------------------- */
 
-/* magnetic button using framer-motion springs */
-function Magnetic({ as = 'a', className = '', children, ...rest }) {
-  const x = useMotionValue(0), y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 250, damping: 18 })
-  const sy = useSpring(y, { stiffness: 250, damping: 18 })
-  const ref = useRef(null)
-  const Comp = motion[as] || motion.a
-  const fine = typeof window !== 'undefined' && window.matchMedia('(pointer:fine)').matches
+function Hero() {
   return (
-    <Comp ref={ref} className={className} style={{ x: sx, y: sy }}
-      whileHover={{ scale: 1.045 }} whileTap={{ scale: 0.97 }}
-      onMouseMove={(e) => {
-        if (!fine || !ref.current) return
-        const r = ref.current.getBoundingClientRect()
-        x.set((e.clientX - r.left - r.width / 2) * 0.2)
-        y.set((e.clientY - r.top - r.height / 2) * 0.3)
-      }}
-      onMouseLeave={() => { x.set(0); y.set(0) }}
-      {...rest}>
-      {children}
-    </Comp>
-  )
-}
+    <section className="relative flex min-h-screen flex-col justify-between overflow-hidden px-6 pb-10 pt-7 md:px-10">
+      <div className="blob left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true" />
 
-/* certificate / award card with stagger entrance */
-function VCard({ item, isAward, onOpen, index = 0 }) {
-  const [failed, setFailed] = useState(false)
-  const clickable = !!item.id
-  return (
-    <motion.button type="button"
-      className={'vcard glass gloss' + (clickable ? '' : ' static')}
-      aria-label={clickable ? `${isAward ? 'View award' : 'View certificate'}: ${item.title}` : item.title}
-      onClick={() => clickable && onOpen(item)}
-      initial={{ opacity: 0, y: 26, scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: '0px 0px -6% 0px' }}
-      transition={{ type: 'spring', stiffness: 130, damping: 18, delay: (index % 4) * 0.07 }}
-      whileHover={clickable ? { y: -8, scale: 1.02 } : { y: -4 }}
-      whileTap={clickable ? { scale: 0.98 } : undefined}>
-      <div className="vthumb">
-        {isAward && item.rank && (<span className="ribbon"><Ic k="trophy" />{item.rank}</span>)}
-        {clickable && !failed ? (
-          <img src={thumb(item.id)} alt={item.title} loading="lazy" onError={() => setFailed(true)} />
-        ) : (
-          <div className="ph" style={{ display: 'grid' }}><Ic k={isAward ? 'trophy' : 'cert'} /></div>
-        )}
-        {clickable && (<div className="view-ov"><span><Ic k="eye" /> Preview</span></div>)}
+      {/* top bar */}
+      <motion.div
+        className="relative z-10 flex items-center justify-between"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: EASE }}
+      >
+        <a
+          href="mailto:fakhroosyakir@gmail.com?subject=Book%20a%20call"
+          className="rounded-full border border-cream/30 px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.25em] transition-all duration-300 hover:scale-105 hover:border-cream hover:bg-cream hover:text-ink"
+        >
+          Book a Call
+        </a>
+        <nav className="flex items-center gap-7 text-[13px]">
+          <a href="#projects" className="link-line">Studio</a>
+          <a href="https://www.linkedin.com/in/fakhrus-syakir-65bb72205" target="_blank" rel="noopener" className="link-line">LinkedIn</a>
+        </nav>
+      </motion.div>
+
+      {/* center name */}
+      <div className="relative z-10 text-center">
+        <h1 className="display relative inline-block text-[21vw] leading-[0.85] md:text-[17vw]">
+          <motion.span
+            className="block"
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
+          >
+            Fakhrus
+          </motion.span>
+          <motion.span
+            className="block"
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: EASE, delay: 0.3 }}
+          >
+            Syakir
+          </motion.span>
+          <span className="absolute left-1/2 top-1/2 z-10 block -translate-x-1/2 -translate-y-1/2">
+            <motion.span
+              className="block h-[13vw] w-[13vw] max-h-36 max-w-36 min-h-20 min-w-20 overflow-hidden rounded-2xl border border-cream/20 shadow-2xl md:rounded-3xl"
+              initial={{ opacity: 0, scale: 0.6, rotate: -8 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.55 }}
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}me-cutout.png`}
+                alt="Fakhrus Syakir"
+                className="h-full w-full bg-surface-2 object-cover"
+                style={{ objectPosition: '50% 20%' }}
+              />
+            </motion.span>
+          </span>
+        </h1>
       </div>
-      <div className="vbody">
-        <span className="vissuer">{item.issuer}</span>
-        <span className="vtitle">{item.title}</span>
-        {item.date && <span className="vdate">{item.date}</span>}
-      </div>
-    </motion.button>
+
+      {/* bottom row */}
+      <motion.div
+        className="relative z-10 flex flex-col justify-between gap-6 text-[13px] leading-relaxed text-warm md:flex-row md:items-end"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: EASE, delay: 0.7 }}
+      >
+        <p className="max-w-xs">
+          I currently work as a Junior Network Engineer at{' '}
+          <a href="https://www.mastersystem.co.id" target="_blank" rel="noopener" className="link-line text-cream">Mastersystem</a>
+          , currently available for work.
+        </p>
+        <p className="max-w-xs md:text-right">
+          Focused on interfaces and experiences, working remotely from Jakarta, Indonesia.
+        </p>
+      </motion.div>
+    </section>
   )
 }
 
-export default function App() {
-  const [modal, setModal] = useState(null)
-  const [showAll, setShowAll] = useState(false)
-
-  useEffect(() => {
-    document.body.style.overflow = modal ? 'hidden' : ''
-    const onKey = (e) => { if (e.key === 'Escape') setModal(null) }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [modal])
-
-  const totalCerts = CERTS.length + MORE.length
-
+function Statement() {
   return (
-    <>
-      <ScrollProgress />
+    <section className="px-6 py-28 md:px-10 md:py-40">
+      <h2 className="display text-[11.5vw] md:text-[8.5vw]">
+        {['I build startups,', 'accelerate growth,', 'create empires.'].map((line, i) => (
+          <Reveal key={line} delay={i * 0.08}>
+            <span className="block">{line}</span>
+          </Reveal>
+        ))}
+      </h2>
 
-      <div>
-        {/* HERO + header — 21st.dev @syedmoin-lab/portfolio template */}
-        <PortfolioHero photoSrc={`${import.meta.env.BASE_URL}me-cutout.png`} />
+      <div className="mt-20 grid gap-14 md:mt-28 md:grid-cols-2 md:gap-10">
+        <Reveal className="space-y-5 text-[15px] leading-relaxed text-warm md:max-w-md">
+          <p>
+            I specialize in crafting high-converting landing pages and data products for SaaS, Web3
+            and AI startups — pairing clean engineering with interfaces people actually enjoy using.
+          </p>
+          <p>
+            Away from the keyboard I'm probably gaming, watching anime, or digging through new music
+            to fuel the next build session.
+          </p>
+          <p className="text-cream">
+            Currently open to freelance and full-time opportunities — let's make something great.
+          </p>
+        </Reveal>
 
-        {/* ABOUT */}
-        <section className="block" id="about">
-          <div className="wrap">
-            <Reveal className="sec-head"><span className="eyebrow">About</span><h2>From the plant floor<br />to the network &amp; the lab</h2></Reveal>
-            <div className="about-grid">
-              <Reveal>
-                <p className="body">I'm a <strong>Junior Network Engineer at PT Mastersystem Infotama</strong>, one of Indonesia's leading IT &amp; network infrastructure integrators. I work on configuring, deploying, and supporting enterprise network systems.</p>
-                <p className="body">My foundation is in <strong>Electrical Engineering</strong> (Syiah Kuala University) with hands-on industrial experience — relay control systems, cathodic protection, and HMI commissioning for Pertamina-affiliated facilities.</p>
-                <p className="body">In parallel I'm a Google Bangkit <strong>Distinction Graduate</strong> in Machine Learning, applying time-series analysis and ML to environmental forecasting — including a peer-reviewed Scopus Q2 publication.</p>
-                <div className="skills-wrap">
-                  <div className="skills-title">Core toolbox</div>
-                  <div className="tags">
-                    {['Routing & Switching', 'Network Infrastructure', 'ETAP', 'PVsyst', 'CX-One', 'Python', 'RStudio', 'Streamlit', 'Time Series', 'TensorFlow'].map((t, i) => (
-                      <motion.span className="tag glass gloss" key={t}
-                        initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: i * 0.04 }} whileHover={{ y: -3, scale: 1.06 }}>{t}</motion.span>
-                    ))}
-                  </div>
+        <div className="space-y-10">
+          {SKILLS.map((g, i) => (
+            <Reveal key={g.title} delay={i * 0.08}>
+              <h3 className="text-lg font-bold text-cream">{g.title}</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-warm">{g.items}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MusicStrip() {
+  return (
+    <section className="py-10 md:py-16">
+      <Reveal>
+        <div className="marquee">
+          <div className="marquee-track py-2">
+            {[...SONGS, ...SONGS].map((s, i) => (
+              <div
+                key={i}
+                className="w-40 shrink-0 rounded-2xl border border-line bg-surface p-3 transition-transform duration-300 hover:scale-105 md:w-44"
+                aria-hidden={i >= SONGS.length}
+              >
+                <div className={`flex aspect-square items-end rounded-xl bg-gradient-to-br p-3 ${s.hue}`}>
+                  <span className="display text-2xl leading-none text-cream/90">{s.title.slice(0, 1)}</span>
                 </div>
-              </Reveal>
-              <Reveal className="facts" delay={0.1}>
-                {[['server', 'Current role', 'Junior Network Engineer', 'PT Mastersystem Infotama · 2026–Present'],
-                  ['cap', 'Education', 'B.Eng Electrical Engineering', 'Syiah Kuala University · 2021–2025'],
-                  ['check', 'Focus', 'Networks · Power · Machine Learning', null],
-                  ['mail', 'Contact', 'fakhroosyakir@gmail.com', null]].map(([k, kk, v, sub], i) => (
-                  <motion.div className="fact glass gloss" key={kk} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                    <span className="ic"><Ic k={k} /></span>
-                    <div><div className="k">{kk}</div><div className="v">{v}</div>{sub && <div className="k" style={{ textTransform: 'none' }}>{sub}</div>}</div>
-                  </motion.div>
-                ))}
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* EXPERIENCE */}
-        <section className="block" id="experience">
-          <div className="wrap">
-            <Reveal className="sec-head"><span className="eyebrow">Experience</span><h2>A path across networks, plants &amp; labs</h2></Reveal>
-            <div className="timeline">
-              {EXPERIENCE.map((e, i) => (
-                <motion.div className={'tl-item' + (e.now ? ' now' : '')} key={i}
-                  initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '0px 0px -8% 0px' }}
-                  transition={{ duration: 0.55, ease: EASE, delay: i * 0.06 }}>
-                  <div className="tl-when">{e.when}{e.now && <span className="tl-now-badge">Now</span>}</div>
-                  <div className="tl-role">{e.role}</div>
-                  <div className="tl-org">{e.org}</div>
-                  <ul className="tl-list">{e.points.map((p, j) => <li key={j}>{p}</li>)}</ul>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* PUBLICATIONS */}
-        <section className="block" id="publications">
-          <div className="wrap">
-            <Reveal className="sec-head"><span className="eyebrow">Publications</span><h2>Peer-reviewed research</h2><p>Machine learning &amp; time-series methods applied to environmental forecasting in Indonesian lakes.</p></Reveal>
-            <div className="pub-wrap">
-              {PUBS.filter((p) => p.featured).map((p) => (
-                <motion.a className="pub-card pub-featured gloss shine" key={p.href} href={p.href} target="_blank" rel="noopener"
-                  initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-                  transition={{ duration: 0.6, ease: EASE }} whileHover={{ y: -9, scale: 1.01 }}>
-                  <span className="fx a" /><span className="fx b" />
-                  <div className="pub-quote">“</div>
-                  <div className="pub-num">Featured · Journal Article</div>
-                  <div className="pub-badges">{p.badges.map(([cls, label, gem]) => <span className={'pill ' + cls} key={label}>{gem && <Ic k="gem" />}{label}</span>)}</div>
-                  <h3>{p.title}</h3>
-                  <p className="pub-venue">{p.venue}</p>
-                  <div className="pub-meta"><span className="pub-date">{p.date}</span><span className="pub-link">Read paper <Ic k="ext" /></span></div>
-                </motion.a>
-              ))}
-              <div className="pub-side">
-                {PUBS.filter((p) => !p.featured).map((p, i) => (
-                  <motion.a className="pub-card glass gloss shine" key={p.href} href={p.href} target="_blank" rel="noopener"
-                    initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-                    transition={{ duration: 0.6, ease: EASE, delay: i * 0.1 }} whileHover={{ y: -7, scale: 1.015 }}>
-                    <div className="pub-badges">{p.badges.map(([cls, label]) => <span className={'pill ' + cls} key={label}>{label}</span>)}</div>
-                    <h3>{p.title}</h3>
-                    <p className="pub-venue">{p.venue}</p>
-                    <div className="pub-meta"><span className="pub-date">{p.date}</span><span className="pub-link">Read paper <Ic k="ext" /></span></div>
-                  </motion.a>
-                ))}
+                <div className="mt-3 truncate text-[13px] font-semibold text-cream">{s.title}</div>
+                <div className="truncate text-[11px] text-warm">{s.artist}</div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* AWARDS */}
-        <section className="block" id="awards">
-          <div className="wrap">
-            <Reveal className="sec-head"><span className="eyebrow">Awards</span><h2>Competition highlights</h2><p>Click any award to view the certificate in full.</p></Reveal>
-            <div className="vgrid">
-              {AWARDS.map((a, i) => <VCard key={a.id || a.title} item={a} isAward index={i} onOpen={setModal} />)}
-            </div>
-          </div>
-        </section>
-
-        {/* CERTIFICATIONS */}
-        <section className="block" id="certifications">
-          <div className="wrap">
-            <Reveal className="sec-head"><span className="eyebrow">Certifications</span><h2>Credentials &amp; competencies</h2><p>A selection of my strongest certificates — click any to preview it in full.</p></Reveal>
-            <div className="vgrid">
-              {CERTS.map((c, i) => <VCard key={c.id} item={c} index={i} onOpen={setModal} />)}
-            </div>
-            <AnimatePresence initial={false}>
-              {showAll && (
-                <motion.div className="vgrid" style={{ marginTop: 20, overflow: 'hidden' }}
-                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.45, ease: EASE }}>
-                  {MORE.map((c, i) => <VCard key={c.id} item={c} index={i} onOpen={setModal} />)}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Reveal style={{ marginTop: 32, textAlign: 'center' }}>
-              <Magnetic as="button" className="btn btn-ghost" style={{ display: 'inline-flex' }}
-                onClick={() => { const o = !showAll; setShowAll(o); if (!o) document.getElementById('certifications').scrollIntoView({ behavior: 'smooth' }) }}
-                aria-expanded={showAll}>
-                <motion.span style={{ display: 'inline-flex' }} animate={{ rotate: showAll ? 180 : 0 }} transition={{ duration: 0.3 }}><Ic k="chevron" /></motion.span>
-                <span>{showAll ? 'Show fewer' : `View all ${totalCerts} certificates`}</span>
-              </Magnetic>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* CONTACT */}
-        <section className="block" id="contact">
-          <div className="wrap">
-            <Reveal className="contact-card gloss">
-              <span className="cblob x" /><span className="cblob y" />
-              <h2>Let's build something reliable</h2>
-              <p>Open to network engineering, electrical, and machine-learning research opportunities. Let's connect.</p>
-              <div className="cta-row">
-                <Magnetic className="btn btn-primary" href="mailto:fakhroosyakir@gmail.com"><Ic k="mail" /><span>Email me</span></Magnetic>
-                <Magnetic className="btn btn-ghost" href="https://www.linkedin.com/in/fakhrus-syakir-65bb72205" target="_blank" rel="noopener"><Ic k="linkedin" /><span>Connect on LinkedIn</span></Magnetic>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-      </div>
-
-      <footer className="foot">
-        <div className="wrap">
-          <div className="brand"><span className="dot" />Fakhrus Syakir</div>
-          <div>Junior Network Engineer · Electrical Engineer · ML Researcher — Indonesia</div>
-          <div className="mh-socials" style={{ justifyContent: 'center', marginTop: 14 }}>
-            {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['instagram', 'https://www.instagram.com/fakhrus_syakir', 'Instagram'], ['github', 'https://github.com/KHR00S', 'GitHub'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email']].map(([k, href, label]) => (
-              <a key={k} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}><Ic k={k} /></a>
             ))}
           </div>
-          <div style={{ marginTop: 10 }}>© {new Date().getFullYear()} Fakhrus Syakir. Built with care.</div>
         </div>
-      </footer>
+        <p className="mt-6 text-center text-[13px] text-warm">
+          A few songs I can recommend if you're looking for some fresh tunes :)
+        </p>
+      </Reveal>
+    </section>
+  )
+}
 
-      {/* MODAL */}
-      <AnimatePresence>
-        {modal && (
-          <div className="modal open" role="dialog" aria-modal="true">
-            <motion.div className="modal-scrim" onClick={() => setModal(null)}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} />
-            <motion.div className="modal-panel"
-              initial={{ opacity: 0, scale: 0.96, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 10 }}
-              transition={{ duration: 0.28, ease: EASE }}>
-              <div className="modal-bar">
-                <h3>{modal.title}</h3>
-                <div className="actions">
-                  <a className="open-ext" href={`https://drive.google.com/file/d/${modal.id}/view`} target="_blank" rel="noopener">Open in Drive <Ic k="ext" /></a>
-                  <button className="icon-btn" onClick={() => setModal(null)} aria-label="Close"><Ic k="close" /></button>
+function Laptop({ project }) {
+  return (
+    <div className="mx-auto w-full max-w-md">
+      <div className="rounded-t-xl border border-b-0 border-line bg-surface-2 p-2 pb-0">
+        <div className={`flex aspect-[16/10] items-center justify-center rounded-t-lg bg-gradient-to-br ${project.hue}`}>
+          <span className="display px-6 text-center text-3xl text-cream/90">{project.name}</span>
+        </div>
+      </div>
+      <div className="h-3 rounded-b-xl bg-gradient-to-b from-surface-2 to-ink shadow-2xl" />
+      <div className="mx-auto h-1 w-1/3 rounded-b-lg bg-surface-2" />
+    </div>
+  )
+}
+
+function Projects() {
+  return (
+    <section id="projects" className="px-6 py-28 md:px-10 md:py-36">
+      <Reveal className="text-center">
+        <h2 className="display text-[16vw] md:text-[11vw]">Myprojects</h2>
+        <Label className="mt-4">A selection of things I've designed &amp; built</Label>
+      </Reveal>
+
+      <div className="mt-16 space-y-8 md:mt-24">
+        {PROJECTS.map((p, i) => (
+          <Reveal key={p.name}>
+            <article className="relative grid items-center gap-10 rounded-[2rem] border border-line bg-surface p-8 md:grid-cols-2 md:gap-14 md:p-14">
+              <div className={i % 2 ? 'md:order-2' : ''}>
+                <h3 className="display text-4xl md:text-5xl">{p.name}</h3>
+                <p className="mt-5 max-w-md text-[15px] leading-relaxed text-warm">{p.desc}</p>
+                <div className="mt-7 flex flex-wrap gap-2.5">
+                  {p.tags.map((t) => (
+                    <span key={t} className="rounded-full border border-line px-3.5 py-1.5 text-[10px] font-semibold tracking-[0.18em] text-warm">
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <iframe title="Certificate preview" src={`https://drive.google.com/file/d/${modal.id}/preview`} />
-            </motion.div>
+              <div className={i % 2 ? 'md:order-1' : ''}>
+                <Laptop project={p} />
+              </div>
+              <div className="absolute right-6 top-6 flex gap-2.5 md:right-8 md:top-8">
+                <a
+                  href={p.github} target="_blank" rel="noopener" aria-label={`${p.name} on GitHub`}
+                  className="grid h-11 w-11 place-items-center rounded-full border border-line text-cream/80 transition-all duration-300 hover:scale-110 hover:bg-cream hover:text-ink"
+                >
+                  <GithubIcon size={18} />
+                </a>
+                <a
+                  href={p.link} target="_blank" rel="noopener" aria-label={`Open ${p.name}`}
+                  className="grid h-11 w-11 place-items-center rounded-full border border-line text-cream/80 transition-all duration-300 hover:scale-110 hover:bg-cream hover:text-ink"
+                >
+                  <ArrowUpRight size={18} />
+                </a>
+              </div>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Calendar() {
+  const [month, setMonth] = useState(6) // 0-indexed; 6 = July 2026
+  const [day, setDay] = useState(null)
+  const [slot, setSlot] = useState(null)
+  const year = 2026
+  const first = new Date(year, month, 1).getDay()
+  const days = new Date(year, month + 1, 0).getDate()
+  const name = new Date(year, month, 1).toLocaleString('en', { month: 'long' })
+
+  return (
+    <div className="mx-auto mt-14 max-w-xl rounded-[2rem] border border-line bg-surface p-6 md:p-9">
+      <div className="flex items-center justify-between">
+        <button
+          type="button" onClick={() => { setMonth((m) => Math.max(0, m - 1)); setDay(null); setSlot(null) }}
+          className="grid h-9 w-9 place-items-center rounded-full border border-line transition-colors hover:bg-cream hover:text-ink"
+          aria-label="Previous month"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div className="text-sm font-semibold tracking-[0.2em] uppercase">{name} {year}</div>
+        <button
+          type="button" onClick={() => { setMonth((m) => Math.min(11, m + 1)); setDay(null); setSlot(null) }}
+          className="grid h-9 w-9 place-items-center rounded-full border border-line transition-colors hover:bg-cream hover:text-ink"
+          aria-label="Next month"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[11px] uppercase tracking-widest text-warm">
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => <div key={d} className="py-1">{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: first }).map((_, i) => <div key={'e' + i} />)}
+        {Array.from({ length: days }).map((_, i) => {
+          const d = i + 1
+          const active = day === d
+          return (
+            <button
+              key={d} type="button" onClick={() => { setDay(d); setSlot(null) }}
+              className={`aspect-square rounded-lg text-[13px] transition-colors ${active ? 'bg-cream font-bold text-ink' : 'text-cream/80 hover:bg-surface-2'}`}
+            >
+              {d}
+            </button>
+          )
+        })}
+      </div>
+
+      {day && (
+        <div className="mt-6 border-t border-line pt-6">
+          <Label>Available slots — {name} {day}</Label>
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            {CAL_SLOTS.map((s) => (
+              <button
+                key={s} type="button" onClick={() => setSlot(s)}
+                className={`rounded-full border px-4 py-2 text-[13px] transition-colors ${slot === s ? 'border-cream bg-cream font-semibold text-ink' : 'border-line hover:border-cream'}`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
-        )}
-      </AnimatePresence>
+          {slot && (
+            <a
+              href={`mailto:fakhroosyakir@gmail.com?subject=Call%20booking%20—%20${name}%20${day}%2C%20${slot}%20WIB`}
+              className="mt-6 block rounded-full bg-cream py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.2em] text-ink transition-transform hover:scale-[1.02]"
+            >
+              Confirm {name} {day} · {slot} WIB
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PartnerCTA() {
+  return (
+    <section className="px-6 py-28 md:px-10 md:py-36">
+      <Reveal className="text-center">
+        <h2 className="display text-[12vw] md:text-[7.5vw]">Partner with us.<br />Launch fast.</h2>
+        <p className="mx-auto mt-8 max-w-lg text-[15px] leading-relaxed text-warm">
+          We're an AI-powered studio that designs, builds and ships production-ready products in weeks, not months.
+        </p>
+        <p className="mt-3 text-[13px] font-semibold uppercase tracking-[0.2em] text-cream">
+          Limited offer — first 3 bookings this month get a free strategy sprint.
+        </p>
+      </Reveal>
+      <Reveal delay={0.1}>
+        <Calendar />
+      </Reveal>
+    </section>
+  )
+}
+
+function Testimonials() {
+  return (
+    <section className="px-6 py-28 md:px-10 md:py-36">
+      <Reveal className="text-center">
+        <h2 className="display text-[15vw] md:text-[10vw]">Testimonials</h2>
+        <Label className="mt-4">Kind words from people I've worked with</Label>
+      </Reveal>
+      <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
+        {TESTIMONIALS.map((t, i) => (
+          <Reveal key={t.name} delay={(i % 3) * 0.08}>
+            <figure className="flex h-full flex-col rounded-3xl border border-line bg-surface p-8">
+              <div className="display text-3xl text-cream/25" aria-hidden="true">//</div>
+              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-cream/85">
+                {t.quote}
+              </blockquote>
+              <figcaption className="mt-7">
+                <div className="text-[13px] font-bold tracking-[0.12em]">{t.name}</div>
+                <div className="mt-1 text-[12px] text-warm">{t.role}</div>
+              </figcaption>
+            </figure>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Footer() {
+  return (
+    <footer id="contact" className="px-6 pb-10 pt-24 md:px-10 md:pt-36">
+      <Reveal>
+        <h2 className="display text-center text-[19vw] leading-none md:text-[16.5vw]">Let's talk</h2>
+      </Reveal>
+
+      <Reveal delay={0.1}>
+        <div className="mt-16 flex flex-col justify-between gap-12 md:mt-24 md:flex-row">
+          <div className="max-w-md">
+            <p className="text-[15px] leading-relaxed text-warm">
+              Got a question, proposal, project, or want to work together on something?
+            </p>
+            <div className="mt-6 flex flex-col gap-3 text-[15px]">
+              <a href="mailto:fakhroosyakir@gmail.com" className="link-line w-fit text-cream">Send me an email</a>
+              <a href="mailto:fakhroosyakir@gmail.com?subject=Book%20a%20call" className="link-line w-fit text-cream">Book a call</a>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 text-[15px] md:items-end">
+            <a href="https://www.linkedin.com/in/fakhrus-syakir-65bb72205" target="_blank" rel="noopener" className="link-line w-fit">LinkedIn</a>
+            <a href="https://github.com/KHR00S" target="_blank" rel="noopener" className="link-line w-fit">GitHub</a>
+          </div>
+        </div>
+      </Reveal>
+
+      <div className="mt-16 border-t border-line pt-6 md:mt-24">
+        <div className="flex flex-col justify-between gap-3 text-[12px] text-warm md:flex-row">
+          <span>Copyright {new Date().getFullYear()}</span>
+          <span>
+            Need help with a website? DM me —{' '}
+            <a href="mailto:fakhroosyakir@gmail.com" className="link-line text-cream">Fakhrus</a>
+          </span>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+/* ----------------------------------- app ----------------------------------- */
+
+export default function App() {
+  return (
+    <>
+      <CursorDot />
+      <Hero />
+      <Statement />
+      <MusicStrip />
+      <Projects />
+      <PartnerCTA />
+      <Testimonials />
+      <Footer />
     </>
   )
 }
