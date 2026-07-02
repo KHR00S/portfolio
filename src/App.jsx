@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   motion, AnimatePresence, useMotionValue, useSpring,
-  useScroll, useTransform, useInView, useReducedMotion, animate,
+  useScroll, useInView, useReducedMotion, animate,
 } from 'framer-motion'
 import { AWARDS, CERTS, MORE } from './data'
+import PortfolioHero from '@/components/ui/portfolio-hero'
 
 /* ----------------------------- icons (raw SVG) ----------------------------- */
 const I = {
@@ -176,47 +177,9 @@ function VCard({ item, isAward, onOpen, index = 0 }) {
   )
 }
 
-const NAV = [
-  ['About', '#about'], ['Experience', '#experience'], ['Publications', '#publications'],
-  ['Awards', '#awards'], ['Certifications', '#certifications'], ['Contact', '#contact'],
-]
-
 export default function App() {
-  const [theme, setTheme] = useState('dark')
   const [modal, setModal] = useState(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [active, setActive] = useState('')
   const [showAll, setShowAll] = useState(false)
-  const reduce = useReducedMotion()
-  const [isDesktop, setIsDesktop] = useState(false)
-
-  /* hero parallax — desktop only, so the mobile description never fades while scrolling */
-  const { scrollY } = useScroll()
-  const heroY = useTransform(scrollY, [0, 600], [0, 120])
-  const heroFade = useTransform(scrollY, [0, 560], [1, 0.3])
-  const portraitY = useTransform(scrollY, [0, 600], [0, -56])
-  const tiltX = useSpring(0, { stiffness: 150, damping: 15 })
-  const tiltY = useSpring(0, { stiffness: 150, damping: 15 })
-
-  useEffect(() => {
-    let saved = null
-    try { saved = localStorage.getItem('theme') } catch (e) {}
-    setTheme(saved || 'dark')
-  }, [])
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    try { localStorage.setItem('theme', theme) } catch (e) {}
-  }, [theme])
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10)
-    onScroll(); window.addEventListener('scroll', onScroll, { passive: true })
-    const spy = new IntersectionObserver(
-      (es) => es.forEach((e) => { if (e.isIntersecting) setActive(e.target.id) }),
-      { rootMargin: '-45% 0px -50% 0px' })
-    NAV.forEach(([, href]) => { const el = document.querySelector(href); if (el) spy.observe(el) })
-    return () => { window.removeEventListener('scroll', onScroll); spy.disconnect() }
-  }, [])
 
   useEffect(() => {
     document.body.style.overflow = modal ? 'hidden' : ''
@@ -225,94 +188,15 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [modal])
 
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 900px) and (pointer: fine)')
-    const upd = () => setIsDesktop(mq.matches)
-    upd(); mq.addEventListener('change', upd)
-    return () => mq.removeEventListener('change', upd)
-  }, [])
-
   const totalCerts = CERTS.length + MORE.length
-  const float = reduce ? {} : { y: [0, -14, 0] }
 
   return (
     <>
       <ScrollProgress />
 
-      {/* NAV */}
-      <motion.header className="nav" id="nav"
-        initial={{ y: -70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6, ease: EASE }}>
-        <div className={'nav-inner' + (scrolled ? ' scrolled' : '')}>
-          <a href="#home" className="brand"><span className="dot" />Fakhrus&nbsp;Syakir</a>
-          <nav className="nav-links">
-            {NAV.map(([label, href], i) => (
-              <motion.a key={href} href={href} className={active === href.slice(1) ? 'active' : ''}
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4 }}
-                whileHover={{ y: -2 }}>{label}</motion.a>
-            ))}
-          </nav>
-          <motion.button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label="Toggle dark mode" whileHover={{ scale: 1.1, rotate: 12 }} whileTap={{ scale: 0.9 }}>
-            <Ic k={theme === 'dark' ? 'moon' : 'sun'} />
-          </motion.button>
-        </div>
-      </motion.header>
-
-      <main id="home">
-        {/* HERO — minimalist */}
-        <section className="mh" id="home-hero">
-          <div className="wrap mh-main">
-            {/* left intro */}
-            <motion.div className="mh-left"
-              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.9, ease: EASE }}>
-              <span className="mh-kicker">Network Engineer · ML Researcher</span>
-              <p className="mh-intro">Junior Network Engineer &amp; Machine Learning researcher — building reliable infrastructure and publishing research on environmental forecasting.</p>
-              <a href="#about" className="mh-readmore">Read more <Ic k="ext" /></a>
-            </motion.div>
-
-            {/* center portrait cutout + accent circle */}
-            <div className="mh-center">
-              <motion.div className="mh-circle"
-                initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }} />
-              <div className="mh-photo-wrap">
-                <motion.img className="mh-photo" src={`${import.meta.env.BASE_URL}me-cutout.png`}
-                  alt="Fakhrus Syakir — black and white portrait"
-                  initial={{ opacity: 0, y: 44 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-                  whileHover={isDesktop ? { scale: 1.03 } : undefined} />
-              </div>
-            </div>
-
-            {/* right giant type */}
-            <motion.div className="mh-right"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.1, ease: EASE }}>
-              <h1 className="mh-big">net<br /><em>work.</em></h1>
-            </motion.div>
-          </div>
-
-          {/* footer row: socials + location */}
-          <motion.div className="wrap mh-foot"
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.3 }}>
-            <div className="mh-socials">
-              {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['instagram', 'https://www.instagram.com/fakhrus_syakir', 'Instagram'], ['github', 'https://github.com/KHR00S', 'GitHub'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email']].map(([k, href, label]) => (
-                <motion.a key={k} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}
-                  whileHover={{ y: -3, scale: 1.1 }} whileTap={{ scale: 0.92 }}><Ic k={k} /></motion.a>
-              ))}
-            </div>
-            <span className="mh-loc">Banda Aceh · Jakarta, ID</span>
-          </motion.div>
-
-          {/* MARQUEE */}
-          <div className="wrap"><div className="marquee glass gloss" aria-hidden="true">
-            <div className="marquee-track">
-              {[...Array(2)].flatMap((_, n) => [
-                'Network Engineering', 'Routing & Switching', 'Machine Learning', 'HMI Commissioning',
-                'Time Series Forecasting', 'ETAP · PVsyst · CX-One', 'Python · RStudio', 'Power System Analysis',
-              ].map((t, i) => (<span className="marquee-item" key={n + '-' + i}><span className="d" />{t}</span>)))}
-            </div>
-          </div></div>
-        </section>
+      <div>
+        {/* HERO + header — 21st.dev @syedmoin-lab/portfolio template */}
+        <PortfolioHero photoSrc={`${import.meta.env.BASE_URL}me-cutout.png`} />
 
         {/* ABOUT */}
         <section className="block" id="about">
@@ -453,13 +337,18 @@ export default function App() {
             </Reveal>
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="foot">
         <div className="wrap">
           <div className="brand"><span className="dot" />Fakhrus Syakir</div>
           <div>Junior Network Engineer · Electrical Engineer · ML Researcher — Indonesia</div>
-          <div style={{ marginTop: 6 }}>© {new Date().getFullYear()} Fakhrus Syakir. Built with care.</div>
+          <div className="mh-socials" style={{ justifyContent: 'center', marginTop: 14 }}>
+            {[['linkedin', 'https://www.linkedin.com/in/fakhrus-syakir-65bb72205', 'LinkedIn'], ['instagram', 'https://www.instagram.com/fakhrus_syakir', 'Instagram'], ['github', 'https://github.com/KHR00S', 'GitHub'], ['mail', 'mailto:fakhroosyakir@gmail.com', 'Email']].map(([k, href, label]) => (
+              <a key={k} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener" aria-label={label}><Ic k={k} /></a>
+            ))}
+          </div>
+          <div style={{ marginTop: 10 }}>© {new Date().getFullYear()} Fakhrus Syakir. Built with care.</div>
         </div>
       </footer>
 

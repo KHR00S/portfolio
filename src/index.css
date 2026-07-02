@@ -1,3 +1,7 @@
+/* Tailwind v4 — theme + utilities only (no preflight, existing reset stays authoritative) */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 /* ============ DESIGN TOKENS — monochrome + blue accent, GLOSSY ============ */
   :root{
     --bg:#FAFAF9;
@@ -327,7 +331,7 @@
 .mh-circle{position:absolute;inset:0;border-radius:50%;z-index:0;
   background:radial-gradient(circle at 34% 28%,#ECFCCB,#A3E635 50%,#84CC16);
   box-shadow:0 50px 130px -34px rgba(132,204,22,.6)}
-.mh-photo-wrap{position:absolute;left:50%;bottom:-3%;transform:translateX(-50%);width:104%;z-index:1;pointer-events:none}
+.mh-photo-wrap{position:absolute;left:50%;bottom:-7%;transform:translateX(-50%);width:104%;z-index:1;pointer-events:none}
 .mh-photo{width:100%;height:auto;max-width:none;display:block;filter:grayscale(1) contrast(1.06) brightness(1.03) drop-shadow(0 22px 36px rgba(0,0,0,.35))}
 @media(min-width:861px){.mh-center{width:clamp(340px,30vw,420px)}}
 .mh-right{justify-self:end;text-align:right;position:relative;z-index:2}
