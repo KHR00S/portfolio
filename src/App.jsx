@@ -3,8 +3,12 @@ import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring, useRe
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import Lenis from 'lenis'
 
-const EASE = [0.16, 1, 0.3, 1]
-const PRELOAD_MS = 1900
+/* easing dna lifted from the reference: gsap power3/expo easeOut for reveals,
+   power3.inOut for overlay moves */
+const EASE = [0.215, 0.61, 0.355, 1] // power3.out
+const EXPO = [0.19, 1, 0.22, 1] // expo.out
+const P3IO = [0.645, 0.045, 0.355, 1] // power3.inOut
+const PRELOAD_MS = 2300
 
 function GithubIcon({ size = 18 }) {
   return (
@@ -114,7 +118,7 @@ function MaskReveal({ children, className = '', delay = 0 }) {
         initial={{ y: '110%' }}
         whileInView={{ y: 0 }}
         viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-        transition={{ duration: 0.9, ease: EASE, delay }}
+        transition={{ duration: 1.1, ease: EXPO, delay }}
       >
         {children}
       </motion.span>
@@ -135,8 +139,8 @@ function CursorDot() {
   const reduce = useReducedMotion()
   const x = useMotionValue(-100)
   const y = useMotionValue(-100)
-  const sx = useSpring(x, { stiffness: 260, damping: 24, mass: 0.6 })
-  const sy = useSpring(y, { stiffness: 260, damping: 24, mass: 0.6 })
+  const sx = useSpring(x, { stiffness: 450, damping: 30, mass: 0.55 })
+  const sy = useSpring(y, { stiffness: 450, damping: 30, mass: 0.55 })
   const ref = useRef(null)
 
   useEffect(() => {
@@ -164,14 +168,14 @@ function Preloader({ show }) {
         <motion.div
           className="fixed inset-0 z-[100] grid place-items-center bg-ink"
           exit={{ y: '-100%' }}
-          transition={{ duration: 0.75, ease: EASE }}
+          transition={{ duration: 0.85, ease: P3IO }}
           aria-hidden="true"
         >
           <motion.p
             className="px-6 text-center text-lg font-medium tracking-wide text-cream md:text-2xl"
-            initial={{ clipPath: 'inset(0 100% 0 0)', opacity: 0.4 }}
-            animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
+            initial={{ clipPath: 'inset(0 100% 0 0)', y: 24, opacity: 0.3 }}
+            animate={{ clipPath: 'inset(0 0% 0 0)', y: 0, opacity: 1 }}
+            transition={{ duration: 1, ease: EXPO, delay: 0.2 }}
           >
             Innovating, Empowering, Delivering.
           </motion.p>
@@ -294,9 +298,9 @@ function Hero({ entered }) {
             <span key={line} className="block overflow-hidden">
               <motion.span
                 className="block"
-                initial={{ y: '105%' }}
+                initial={{ y: 150 }}
                 animate={{ y: 0 }}
-                transition={{ duration: 1, ease: EASE, delay: d(0.15 + i * 0.14) }}
+                transition={{ duration: 1.4, ease: EXPO, delay: d(0.1 + i * 0.2) }}
               >
                 {line}
               </motion.span>
