@@ -383,9 +383,9 @@ function MusicStrip() {
             ))}
           </div>
         </div>
-        <p className="mt-6 text-center text-[13px] text-warm">
+        <Label className="mt-7 text-center">
           A few songs I can recommend if you're looking for some fresh tunes :)
-        </p>
+        </Label>
       </Reveal>
     </section>
   )
@@ -398,7 +398,11 @@ function Projects() {
         <h2 className="display text-[16vw] md:text-[11vw]">
           <MaskReveal>Myprojects</MaskReveal>
         </h2>
-        <Reveal delay={0.15}><Label className="mt-4">Research &amp; engineering work from my CV</Label></Reveal>
+        <Reveal delay={0.15}>
+          <Label className="mx-auto mt-5 max-w-2xl leading-relaxed">
+            From peer-reviewed forecasting models to utility-scale solar — every build here solves a real-world problem.
+          </Label>
+        </Reveal>
       </div>
 
       <div className="mt-16 space-y-8 md:mt-24">
@@ -547,13 +551,14 @@ function Footer() {
 
       <Reveal delay={0.1}>
         <div className="mt-16 flex flex-col justify-between gap-12 md:mt-24 md:flex-row">
-          <div className="max-w-md">
-            <p className="text-[15px] leading-relaxed text-warm">
+          <div className="max-w-lg">
+            <p className="text-[13px] font-medium uppercase leading-relaxed tracking-[0.22em] text-warm">
               Got a question, proposal, project, or want to work together on something?
             </p>
-            <div className="mt-6 flex flex-col gap-3 text-[15px]">
-              <a href="mailto:fakhroosyakir@gmail.com" className="link-line w-fit text-cream">Send me an email</a>
-              <a href="mailto:fakhroosyakir@gmail.com?subject=Book%20a%20call" className="link-line w-fit text-cream">Book a call</a>
+            <div className="mt-7 flex flex-wrap items-center gap-4 text-[13px] font-semibold uppercase tracking-[0.18em]">
+              <a href="mailto:fakhroosyakir@gmail.com" className="link-line text-cream">Send me an email</a>
+              <span className="text-warm">or</span>
+              <a href="mailto:fakhroosyakir@gmail.com?subject=Book%20a%20call" className="link-line text-cream">Book a call</a>
             </div>
           </div>
           <div className="flex flex-col gap-3 text-[15px] md:items-end">
@@ -564,11 +569,11 @@ function Footer() {
       </Reveal>
 
       <div className="mt-16 border-t border-line pt-6 md:mt-24">
-        <div className="flex flex-col justify-between gap-3 text-[12px] text-warm md:flex-row">
+        <div className="flex flex-col justify-between gap-3 text-[11px] font-medium uppercase tracking-[0.18em] text-warm md:flex-row">
           <span>Copyright {new Date().getFullYear()}</span>
           <span>
             Need help with a project? DM me —{' '}
-            <a href="mailto:fakhroosyakir@gmail.com" className="link-line text-cream">Fakhrus</a>
+            <a href="mailto:fakhroosyakir@gmail.com" className="link-line text-cream">Fakhrus Syakir</a>
           </span>
         </div>
       </div>
