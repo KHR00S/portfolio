@@ -82,7 +82,7 @@ html.lenis, html.lenis body { height: auto; }
   display: flex;
   gap: 1.25rem;
   width: max-content;
-  animation: marquee-scroll 32s linear infinite;
+  animation: marquee-scroll 20s linear infinite;
 }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 @keyframes marquee-scroll {
