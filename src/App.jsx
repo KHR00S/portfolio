@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import Lenis from 'lenis'
 
@@ -263,9 +263,16 @@ function Laptop({ project }) {
 
 function Hero({ entered }) {
   const d = (t) => (entered ? t : t + PRELOAD_MS / 1000 - 0.3)
+  /* sticky parallax: blob and name scroll away slower than the page */
+  const { scrollY } = useScroll()
+  const blobY = useTransform(scrollY, [0, 900], [0, 320])
+  const nameY = useTransform(scrollY, [0, 900], [0, 180])
+  const nameFade = useTransform(scrollY, [0, 650], [1, 0.15])
   return (
     <section className="relative flex min-h-screen flex-col justify-between overflow-hidden px-6 pb-10 pt-7 md:px-10">
-      <div className="blob left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true" />
+      <motion.div className="absolute inset-0" style={{ y: blobY }} aria-hidden="true">
+        <div className="blob left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      </motion.div>
 
       {/* top bar */}
       <motion.div
@@ -292,7 +299,7 @@ function Hero({ entered }) {
       </motion.div>
 
       {/* center name — each line mask-reveals upward */}
-      <div className="relative z-10 text-center">
+      <motion.div className="relative z-10 text-center" style={{ y: nameY, opacity: nameFade }}>
         <h1 className="display relative inline-block text-[21vw] leading-[0.85] md:text-[17vw]">
           {['Fakhrus', 'Syakir'].map((line, i) => (
             <span key={line} className="block overflow-hidden">
@@ -308,7 +315,7 @@ function Hero({ entered }) {
           ))}
           <Avatar delay={d(0.6)} />
         </h1>
-      </div>
+      </motion.div>
 
       {/* bottom row */}
       <motion.div
