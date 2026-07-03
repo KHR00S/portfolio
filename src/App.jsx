@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import Lenis from 'lenis'
+import { AWARDS, CERTS } from './data'
+
+const driveThumb = (id, w = 400) => `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`
 
 /* easing dna lifted from the reference: gsap power3/expo easeOut for reveals,
    power3.inOut for overlay moves */
@@ -27,18 +30,8 @@ const SKILLS = [
   { title: 'Engineering Tools', items: 'ETAP, PVsyst, CX-One, AutoCAD, HMI & PLC Systems' },
 ]
 
-const SONGS = [
-  { title: 'Blinding Lights', artist: 'The Weeknd', hue: 'from-red-500/70 to-orange-600/60' },
-  { title: 'As It Was', artist: 'Harry Styles', hue: 'from-sky-400/70 to-indigo-600/60' },
-  { title: 'Glimpse of Us', artist: 'Joji', hue: 'from-zinc-400/70 to-zinc-700/60' },
-  { title: 'Monokrom', artist: 'Tulus', hue: 'from-amber-400/70 to-yellow-700/60' },
-  { title: 'About You', artist: 'The 1975', hue: 'from-fuchsia-500/70 to-purple-700/60' },
-  { title: 'Secukupnya', artist: 'Hindia', hue: 'from-teal-400/70 to-emerald-700/60' },
-  { title: 'Die With A Smile', artist: 'Lady Gaga & Bruno Mars', hue: 'from-rose-500/70 to-red-800/60' },
-  { title: 'Sunsetz', artist: 'Cigarettes After Sex', hue: 'from-slate-400/70 to-slate-700/60' },
-  { title: 'Evaluasi', artist: 'Hindia', hue: 'from-lime-400/70 to-green-700/60' },
-  { title: 'Nightcall', artist: 'Kavinsky', hue: 'from-violet-500/70 to-blue-800/60' },
-]
+/* marquee items: awards + strongest certificates, thumbnails straight from Drive */
+const CERT_ITEMS = [...AWARDS, ...CERTS]
 
 const PROJECTS = [
   {
@@ -47,6 +40,7 @@ const PROJECTS = [
     tags: ['PYTHON', 'TENSORFLOW', 'TIME SERIES'],
     github: 'https://github.com/KHR00S',
     link: 'https://link.springer.com/article/10.1007/s00704-025-05717-3',
+    img: '1-huriPSxx9xzJbl8SG0IJM_b5sU6vIuf',
     hue: 'from-cyan-500/40 to-blue-800/40',
   },
   {
@@ -55,6 +49,7 @@ const PROJECTS = [
     tags: ['PYTHON', 'SVM', 'DASHBOARD'],
     github: 'https://github.com/KHR00S',
     link: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
+    img: '1IOw7OeyFdtoJ4o7ZDe9Qqxl5S6sbTsjI',
     hue: 'from-emerald-500/40 to-teal-800/40',
   },
   {
@@ -63,6 +58,7 @@ const PROJECTS = [
     tags: ['PYTHON', 'SEMI-SUPERVISED', 'FORECASTING'],
     github: 'https://github.com/KHR00S',
     link: 'https://heca-analitika.com/ijds/article/view/211',
+    img: '1BgX1r_OKk8qPo14FY783B7rUiNlnUytW',
     hue: 'from-violet-500/40 to-purple-800/40',
   },
   {
@@ -71,6 +67,7 @@ const PROJECTS = [
     tags: ['TENSORFLOW', 'KERAS', 'ML'],
     github: 'https://github.com/KHR00S',
     link: 'https://github.com/KHR00S',
+    img: '1KbZR9YE8fofpsLEMwnkPSySlJDGc9o06',
     hue: 'from-rose-500/40 to-pink-800/40',
   },
   {
@@ -79,6 +76,7 @@ const PROJECTS = [
     tags: ['PVSYST', 'ETAP', 'AUTOCAD'],
     github: 'https://github.com/KHR00S',
     link: 'https://github.com/KHR00S',
+    img: '1u6dCyv74dUBawV8DrqMPItkq6k4xszP3',
     hue: 'from-yellow-500/40 to-amber-800/40',
   },
   {
@@ -211,17 +209,18 @@ function Avatar({ delay }) {
     <span className="absolute left-1/2 top-1/2 z-10 block -translate-x-1/2 -translate-y-1/2" style={{ perspective: 600 }}>
       <motion.span
         ref={ref}
-        className="block h-[13vw] w-[13vw] max-h-36 max-w-36 min-h-20 min-w-20 overflow-hidden rounded-2xl border border-cream/20 shadow-2xl md:rounded-3xl"
+        className="block h-[110px] w-[110px] overflow-hidden rounded-[16px] border border-cream/20 shadow-2xl md:h-[170px] md:w-[170px] md:rounded-[28px] lg:h-[215px] lg:w-[215px] lg:rounded-[32px]"
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.08 }}
+        whileHover={{ scale: 1.04 }}
         transition={{ duration: 0.9, ease: EASE, delay }}
         style={{ rotateX: rx, rotateY: ry }}
       >
+        {/* reference detail: portrait is grayscale until hovered, then colour bleeds in */}
         <img
           src={`${import.meta.env.BASE_URL}me-cutout.png`}
           alt="Fakhrus Syakir"
-          className="h-full w-full bg-surface-2 object-cover"
+          className="h-full w-full bg-surface-2 object-cover grayscale transition-[filter] duration-500 ease-out hover:grayscale-0"
           style={{ objectPosition: '50% 20%' }}
         />
       </motion.span>
@@ -248,8 +247,17 @@ function Laptop({ project }) {
     <div className="mx-auto w-full max-w-md" style={{ perspective: 900 }}>
       <motion.div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} style={{ rotateX: rx, rotateY: ry }}>
         <div className="rounded-t-xl border border-b-0 border-line bg-surface-2 p-2 pb-0">
-          <div className={`flex aspect-[16/10] items-center justify-center rounded-t-lg bg-gradient-to-br ${project.hue}`}>
-            <span className="display px-6 text-center text-3xl text-cream/90">{project.name}</span>
+          <div className={`relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-t-lg bg-gradient-to-br ${project.hue}`}>
+            {project.img ? (
+              <img
+                src={driveThumb(project.img, 640)}
+                alt={`${project.name} preview`}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <span className="display px-6 text-center text-3xl text-cream/90">{project.name}</span>
+            )}
           </div>
         </div>
         <div className="h-3 rounded-b-xl bg-gradient-to-b from-surface-2 to-ink shadow-2xl" />
@@ -373,29 +381,38 @@ function Statement() {
   )
 }
 
-function MusicStrip() {
+function CertStrip() {
   return (
     <section className="py-10 md:py-16">
       <Reveal>
         <div className="marquee">
           <div className="marquee-track py-2">
-            {[...SONGS, ...SONGS].map((s, i) => (
-              <div
+            {[...CERT_ITEMS, ...CERT_ITEMS].map((c, i) => (
+              <a
                 key={i}
-                className="w-40 shrink-0 rounded-2xl border border-line bg-surface p-3 transition-transform duration-300 hover:scale-105 md:w-44"
-                aria-hidden={i >= SONGS.length}
+                href={`https://drive.google.com/file/d/${c.id}/view`}
+                target="_blank"
+                rel="noopener"
+                className="w-52 shrink-0 rounded-2xl border border-line bg-surface p-3 transition-transform duration-300 hover:scale-105 md:w-60"
+                aria-hidden={i >= CERT_ITEMS.length}
+                tabIndex={i >= CERT_ITEMS.length ? -1 : 0}
               >
-                <div className={`flex aspect-square items-end rounded-xl bg-gradient-to-br p-3 ${s.hue}`}>
-                  <span className="display text-2xl leading-none text-cream/90">{s.title.slice(0, 1)}</span>
+                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-surface-2">
+                  <img
+                    src={driveThumb(c.id)}
+                    alt={c.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-                <div className="mt-3 truncate text-[13px] font-semibold text-cream">{s.title}</div>
-                <div className="truncate text-[11px] text-warm">{s.artist}</div>
-              </div>
+                <div className="mt-3 truncate text-[13px] font-semibold text-cream">{c.title}</div>
+                <div className="truncate text-[11px] text-warm">{c.issuer} · {c.date}</div>
+              </a>
             ))}
           </div>
         </div>
         <Label className="mt-7 text-center">
-          A few songs I can recommend if you're looking for some fresh tunes :)
+          Certificates &amp; awards from my journey — click any to view the real thing :)
         </Label>
       </Reveal>
     </section>
@@ -622,7 +639,7 @@ export default function App() {
       <CursorDot />
       <Hero entered={reduce} />
       <Statement />
-      <MusicStrip />
+      <CertStrip />
       <Projects />
       <BookCall />
       <Footer />
