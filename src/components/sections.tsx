@@ -3,7 +3,7 @@ import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion'
 import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react'
 import { Lake } from './Lake'
 import { useTheme } from '../theme'
-import { BUILDS, EMAIL, EXPERIENCE, LINKS, PUBLICATIONS, STRATA, driveThumb } from '../content'
+import { BUILDS, EMAIL, EXPERIENCE, LINKS, PUBLICATIONS, STRATA, type Cover } from '../content'
 
 const EXPO = [0.19, 1, 0.22, 1] as const
 export const WRAP = 'mx-auto w-full max-w-[1400px] px-4 md:px-8'
@@ -327,25 +327,23 @@ export function Path() {
 
 /* ---------------------------------- research -------------------------------- */
 
-/* hides itself if Google Drive refuses the thumbnail, instead of showing a broken image */
-function PaperFigure({ id, alt }: { id: string; alt: string }) {
+/* a journal cover linked to its journal or issue page; hides itself if the publisher won't serve it */
+function CoverLink({ cover, className }: { cover: Cover; className: string }) {
   const [failed, setFailed] = useState(false)
   if (failed) return null
   return (
-    <figure className="lg:col-span-4 lg:col-start-9">
+    <a href={cover.href} target="_blank" rel="noopener noreferrer" className="block w-fit">
       <img
-        src={driveThumb(id, 700)}
-        alt={alt}
-        width={700}
-        height={906}
+        src={cover.src}
+        alt={cover.alt}
+        width={cover.width}
+        height={cover.height}
         loading="lazy"
+        decoding="async"
         onError={() => setFailed(true)}
-        className="h-auto w-full max-w-[320px] rounded-xl bg-bg-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.5)] lg:max-w-none"
+        className={`h-auto rounded-md bg-bg-2 shadow-[0_18px_40px_-18px_rgb(0_0_0/0.55)] transition-transform duration-300 hover:-translate-y-1 ${className}`}
       />
-      <figcaption className="mt-3 max-w-[40ch] text-sm text-muted">
-        The study shipped with a monitoring and prediction dashboard. This is the cover of its manual.
-      </figcaption>
-    </figure>
+    </a>
   )
 }
 
@@ -372,20 +370,32 @@ export function Research() {
             </ExternalLink>
           </p>
         </div>
-        {featured.img ? <PaperFigure id={featured.img} alt={featured.imgAlt ?? ''} /> : null}
+        <figure className="lg:col-span-4 lg:col-start-9 lg:justify-self-end">
+          <CoverLink cover={featured.cover} className="w-full max-w-[240px] lg:max-w-[280px]" />
+          <figcaption className="mt-3 max-w-[32ch] text-sm text-muted">{featured.cover.caption}</figcaption>
+        </figure>
       </article>
 
       <ul className="mt-12">
         {rest.map((p) => (
-          <li key={p.href} className="grid gap-2 border-t border-rule py-7 md:grid-cols-12 md:gap-8">
-            <p className="tnum text-[15px] text-muted md:col-span-2">{p.date}</p>
-            <h3 className="text-xl font-semibold leading-snug md:col-span-6">
-              <a href={p.href} target="_blank" rel="noopener noreferrer" className="ink-link">
-                {p.title}
-              </a>
-            </h3>
-            <p className="text-[15px] text-muted md:col-span-4">
+          <li
+            key={p.href}
+            className="grid grid-cols-[4.5rem_1fr] gap-x-5 gap-y-2 border-t border-rule py-7 md:grid-cols-[6rem_1fr_16rem] md:gap-x-8"
+          >
+            <div className="row-span-2 md:row-span-1">
+              <CoverLink cover={p.cover} className="w-full" />
+            </div>
+            <div>
+              <p className="tnum text-[15px] text-muted">{p.date}</p>
+              <h3 className="mt-1 text-xl font-semibold leading-snug">
+                <a href={p.href} target="_blank" rel="noopener noreferrer" className="ink-link">
+                  {p.title}
+                </a>
+              </h3>
+            </div>
+            <p className="text-[15px] text-muted md:pt-7">
               {p.venue}
+              <span className="mt-1 block">{p.cover.caption}</span>
               <span className="mt-1 block font-semibold text-fg">{p.badge}</span>
             </p>
           </li>

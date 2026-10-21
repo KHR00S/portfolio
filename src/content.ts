@@ -108,8 +108,18 @@ export interface Publication {
   venue: string
   date: string
   badge: string
-  img?: string
-  imgAlt?: string
+  cover: Cover
+}
+
+/* covers are served by each publisher; width/height are the source pixels */
+export interface Cover {
+  src: string
+  width: number
+  height: number
+  alt: string
+  /** journal or issue page the cover links to */
+  href: string
+  caption: string
 }
 
 export const PUBLICATIONS: Publication[] = [
@@ -119,8 +129,14 @@ export const PUBLICATIONS: Publication[] = [
     venue: 'Theoretical and Applied Climatology, Springer',
     date: '15 Aug 2025',
     badge: 'Scopus Q2',
-    img: '1-huriPSxx9xzJbl8SG0IJM_b5sU6vIuf',
-    imgAlt: 'Manual cover: Dashboard Pemantauan dan Prediksi Upwelling Berbasis Indikator Iklim di Danau Laut Tawar, PKM-RE 2024',
+    cover: {
+      src: 'https://media.springernature.com/w440/springer-static/cover-hires/journal/704?as=webp',
+      width: 440,
+      height: 584,
+      alt: 'Cover of the journal Theoretical and Applied Climatology, published by Springer',
+      href: 'https://link.springer.com/journal/704',
+      caption: 'Theoretical and Applied Climatology, Springer. Indexed in Scopus, Q2.',
+    },
   },
   {
     href: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',
@@ -128,6 +144,14 @@ export const PUBLICATIONS: Publication[] = [
     venue: 'Jurnal Ilmu Pengetahuan dan Teknologi Komputer (JITK)',
     date: '02 Dec 2025',
     badge: 'SINTA 2',
+    cover: {
+      src: 'https://ojs.nusamandiri.ac.id/public/journals/3/cover_issue_135_en.jpg',
+      width: 1240,
+      height: 1755,
+      alt: 'Cover of JITK, Jurnal Ilmu Pengetahuan dan Teknologi Komputer, Vol. 11 No. 2, November 2025',
+      href: 'https://ojs.nusamandiri.ac.id/index.php/jitk/issue/view/135',
+      caption: 'Vol. 11 No. 2, November 2025',
+    },
   },
   {
     href: 'https://heca-analitika.com/ijds/article/view/211',
@@ -135,6 +159,14 @@ export const PUBLICATIONS: Publication[] = [
     venue: 'Infolitika Journal of Data Science',
     date: '19 Nov 2024',
     badge: 'International journal',
+    cover: {
+      src: 'https://heca-analitika.com/public/journals/9/cover_issue_34_en_US.jpg',
+      width: 2480,
+      height: 3510,
+      alt: 'Cover of Infolitika Journal of Data Science, Vol. 2 No. 2, November 2024',
+      href: 'https://heca-analitika.com/ijds/issue/view/34',
+      caption: 'Vol. 2 No. 2, November 2024',
+    },
   },
 ]
 
