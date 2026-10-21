@@ -108,8 +108,10 @@ export interface Publication {
   venue: string
   date: string
   badge: string
-  img?: string
-  imgAlt?: string
+  /** journal cover, served by the publisher */
+  cover?: string
+  coverAlt?: string
+  journalHref?: string
 }
 
 export const PUBLICATIONS: Publication[] = [
@@ -119,8 +121,9 @@ export const PUBLICATIONS: Publication[] = [
     venue: 'Theoretical and Applied Climatology, Springer',
     date: '15 Aug 2025',
     badge: 'Scopus Q2',
-    img: '1-huriPSxx9xzJbl8SG0IJM_b5sU6vIuf',
-    imgAlt: 'Manual cover: Dashboard Pemantauan dan Prediksi Upwelling Berbasis Indikator Iklim di Danau Laut Tawar, PKM-RE 2024',
+    cover: 'https://media.springernature.com/w440/springer-static/cover-hires/journal/704?as=webp',
+    coverAlt: 'Cover of the journal Theoretical and Applied Climatology, published by Springer',
+    journalHref: 'https://link.springer.com/journal/704',
   },
   {
     href: 'https://ejournal.nusamandiri.ac.id/index.php/jitk/article/view/6665',

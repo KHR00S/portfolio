@@ -3,7 +3,7 @@ import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion'
 import { ArrowUpRight, Menu, Moon, Sun, X } from 'lucide-react'
 import { Lake } from './Lake'
 import { useTheme } from '../theme'
-import { BUILDS, EMAIL, EXPERIENCE, LINKS, PUBLICATIONS, STRATA, driveThumb } from '../content'
+import { BUILDS, EMAIL, EXPERIENCE, LINKS, PUBLICATIONS, STRATA } from '../content'
 
 const EXPO = [0.19, 1, 0.22, 1] as const
 export const WRAP = 'mx-auto w-full max-w-[1400px] px-4 md:px-8'
@@ -327,23 +327,32 @@ export function Path() {
 
 /* ---------------------------------- research -------------------------------- */
 
-/* hides itself if Google Drive refuses the thumbnail, instead of showing a broken image */
-function PaperFigure({ id, alt }: { id: string; alt: string }) {
+/* journal cover from the publisher; hides itself if the image can't load */
+function JournalCover({ src, alt, href }: { src: string; alt: string; href?: string }) {
   const [failed, setFailed] = useState(false)
   if (failed) return null
+  const img = (
+    <img
+      src={src}
+      alt={alt}
+      width={440}
+      height={584}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-auto w-full max-w-[240px] rounded-md shadow-[0_24px_60px_-20px_rgb(0_0_0/0.55)] lg:max-w-[280px]"
+    />
+  )
   return (
-    <figure className="lg:col-span-4 lg:col-start-9">
-      <img
-        src={driveThumb(id, 700)}
-        alt={alt}
-        width={700}
-        height={906}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-auto w-full max-w-[320px] rounded-xl bg-bg-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.5)] lg:max-w-none"
-      />
-      <figcaption className="mt-3 max-w-[40ch] text-sm text-muted">
-        The study shipped with a monitoring and prediction dashboard. This is the cover of its manual.
+    <figure className="lg:col-span-4 lg:col-start-9 lg:justify-self-end">
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="block w-fit">
+          {img}
+        </a>
+      ) : (
+        img
+      )}
+      <figcaption className="mt-3 max-w-[32ch] text-sm text-muted">
+        Theoretical and Applied Climatology, Springer. Indexed in Scopus, Q2.
       </figcaption>
     </figure>
   )
@@ -372,7 +381,9 @@ export function Research() {
             </ExternalLink>
           </p>
         </div>
-        {featured.img ? <PaperFigure id={featured.img} alt={featured.imgAlt ?? ''} /> : null}
+        {featured.cover ? (
+          <JournalCover src={featured.cover} alt={featured.coverAlt ?? ''} href={featured.journalHref} />
+        ) : null}
       </article>
 
       <ul className="mt-12">
